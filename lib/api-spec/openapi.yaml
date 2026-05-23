@@ -176,6 +176,9 @@ components:
           type: boolean
         imageUrl:
           type: ["string", "null"]
+        modelUrl:
+          type: ["string", "null"]
+          description: Path to a GLTF/GLB 3D model file for this site
 
     Hotspot:
       type: object
@@ -245,6 +248,9 @@ components:
           type: boolean
         imageUrl:
           type: ["string", "null"]
+        modelUrl:
+          type: ["string", "null"]
+          description: Path to a GLTF/GLB 3D model file for this site
         architecturalStyle:
           type: ["string", "null"]
         hotspots:

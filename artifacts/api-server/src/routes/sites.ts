@@ -93,6 +93,7 @@ function formatSite(s: typeof sitesTable.$inferSelect) {
     significance: s.significance,
     isFeatured: s.isFeatured,
     imageUrl: s.imageUrl ?? null,
+    modelUrl: s.modelUrl ?? null,
   };
 }
 

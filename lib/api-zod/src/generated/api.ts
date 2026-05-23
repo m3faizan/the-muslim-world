@@ -34,7 +34,8 @@ export const ListSitesResponseItem = zod.object({
   "yearFounded": zod.string().nullable(),
   "significance": zod.string().describe('Brief note on Islamic historical significance'),
   "isFeatured": zod.boolean().optional(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site')
 })
 export const ListSitesResponse = zod.array(ListSitesResponseItem)
 
@@ -61,6 +62,7 @@ export const GetSiteResponse = zod.object({
   "significance": zod.string(),
   "isFeatured": zod.boolean().optional(),
   "imageUrl": zod.string().nullish(),
+  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
   "architecturalStyle": zod.string().nullish(),
   "hotspots": zod.array(zod.object({
   "id": zod.number(),
@@ -115,7 +117,8 @@ export const ListFeaturedSitesResponseItem = zod.object({
   "yearFounded": zod.string().nullable(),
   "significance": zod.string().describe('Brief note on Islamic historical significance'),
   "isFeatured": zod.boolean().optional(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site')
 })
 export const ListFeaturedSitesResponse = zod.array(ListFeaturedSitesResponseItem)
 
@@ -139,7 +142,8 @@ export const ListSitesByRegionResponseItem = zod.object({
   "yearFounded": zod.string().nullable(),
   "significance": zod.string().describe('Brief note on Islamic historical significance'),
   "isFeatured": zod.boolean().optional(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site')
 }))
 })
 export const ListSitesByRegionResponse = zod.array(ListSitesByRegionResponseItem)

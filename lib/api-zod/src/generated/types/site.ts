@@ -27,4 +27,9 @@ export interface Site {
   isFeatured?: boolean;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * Path to a GLTF/GLB 3D model file for this site
+     * @nullable
+     */
+  modelUrl?: string | null;
 }

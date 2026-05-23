@@ -17,6 +17,7 @@ export const sitesTable = pgTable("sites", {
   significance: text("significance").notNull(),
   isFeatured: boolean("is_featured").notNull().default(false),
   imageUrl: text("image_url"),
+  modelUrl: text("model_url"),
   architecturalStyle: text("architectural_style"),
   createdAt: timestamp("created_at").defaultNow(),
 });

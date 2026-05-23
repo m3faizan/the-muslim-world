@@ -24,6 +24,11 @@ export interface SiteDetail {
   isFeatured?: boolean;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * Path to a GLTF/GLB 3D model file for this site
+     * @nullable
+     */
+  modelUrl?: string | null;
   /** @nullable */
   architecturalStyle?: string | null;
   hotspots: Hotspot[];

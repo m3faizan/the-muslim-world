@@ -2,7 +2,7 @@ import { useState, Suspense } from "react";
 import { useRoute, Link } from "wouter";
 import { useGetSite } from "@workspace/api-client-react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Html } from "@react-three/drei";
+import { OrbitControls, Html, useGLTF, Center } from "@react-three/drei";
 import * as THREE from "three";
 import {
   MapPin,
@@ -200,6 +200,49 @@ function MosqueMesh({
   );
 }
 
+// ─── GLTF Model loader ──────────────────────────────────────────────────────────
+function GltfMesh({
+  url,
+  hotspots,
+  onHotspotClick,
+  activeHotspot,
+}: {
+  url: string;
+  hotspots: Hotspot[];
+  onHotspotClick: (h: Hotspot) => void;
+  activeHotspot: Hotspot | null;
+}) {
+  const { scene } = useGLTF(url);
+  return (
+    <Center>
+      <primitive object={scene} />
+      {/* Hotspot markers overlaid on the GLTF model */}
+      {hotspots.map((h) => (
+        <group key={h.id} position={[h.positionX, h.positionY, h.positionZ]}>
+          <mesh onClick={() => onHotspotClick(h)}>
+            <sphereGeometry args={[0.06, 16, 16]} />
+            <meshStandardMaterial
+              color={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
+              emissive={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
+              emissiveIntensity={activeHotspot?.id === h.id ? 1.2 : 0.6}
+              roughness={0.2}
+              metalness={0.8}
+            />
+          </mesh>
+          {activeHotspot?.id === h.id && (
+            <Html center distanceFactor={4}>
+              <div className="bg-background/95 border border-secondary/50 rounded-lg px-3 py-2 text-xs text-foreground whitespace-nowrap shadow-xl pointer-events-none max-w-[180px]">
+                <p className="font-semibold text-secondary truncate">{h.label}</p>
+                {h.arabicTerm && <p className="font-arabic text-primary/60 text-right" dir="rtl">{h.arabicTerm}</p>}
+              </div>
+            </Html>
+          )}
+        </group>
+      ))}
+    </Center>
+  );
+}
+
 // ─── Main page ──────────────────────────────────────────────────────────────────
 export default function SiteDetail() {
   const [, params] = useRoute("/site/:id");
@@ -330,25 +373,34 @@ export default function SiteDetail() {
                 gl={{ antialias: true }}
               >
                 <color attach="background" args={["#0d1117"]} />
-                <ambientLight intensity={0.5} />
+                <ambientLight intensity={0.6} />
                 <directionalLight position={[5, 8, 5]} intensity={1.2} castShadow />
                 <directionalLight position={[-4, 3, -4]} intensity={0.3} color="#d4af37" />
                 <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
 
                 <Suspense fallback={null}>
-                  <MosqueMesh
-                    hotspots={hotspots}
-                    onHotspotClick={setActiveHotspot}
-                    activeHotspot={activeHotspot}
-                  />
+                  {site.modelUrl ? (
+                    <GltfMesh
+                      url={site.modelUrl}
+                      hotspots={hotspots}
+                      onHotspotClick={setActiveHotspot}
+                      activeHotspot={activeHotspot}
+                    />
+                  ) : (
+                    <MosqueMesh
+                      hotspots={hotspots}
+                      onHotspotClick={setActiveHotspot}
+                      activeHotspot={activeHotspot}
+                    />
+                  )}
                 </Suspense>
 
                 <OrbitControls
                   enablePan={false}
-                  minDistance={3}
-                  maxDistance={10}
+                  minDistance={1}
+                  maxDistance={20}
                   autoRotate
-                  autoRotateSpeed={0.5}
+                  autoRotateSpeed={0.4}
                 />
               </Canvas>
             </GlobeErrorBoundary>
