@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: The Muslim World API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: sites
+    description: Islamic heritage sites
+  - name: hotspots
+    description: 3D model hotspot annotations
 paths:
   /healthz:
     get:
@@ -24,6 +28,99 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /sites:
+    get:
+      operationId: listSites
+      tags: [sites]
+      summary: List all Islamic heritage sites
+      description: Returns all sites with their globe coordinates and metadata
+      responses:
+        "200":
+          description: List of sites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Site"
+
+  /sites/{id}:
+    get:
+      operationId: getSite
+      tags: [sites]
+      summary: Get a single Islamic heritage site
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Site detail with hotspots
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteDetail"
+        "404":
+          description: Site not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sites/{id}/hotspots:
+    get:
+      operationId: listHotspots
+      tags: [hotspots]
+      summary: List all hotspots for a site
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of hotspots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Hotspot"
+
+  /sites/featured:
+    get:
+      operationId: listFeaturedSites
+      tags: [sites]
+      summary: Get featured Islamic heritage sites for homepage highlight
+      responses:
+        "200":
+          description: Featured sites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Site"
+
+  /sites/by-region:
+    get:
+      operationId: listSitesByRegion
+      tags: [sites]
+      summary: Get sites grouped by geographic region
+      responses:
+        "200":
+          description: Sites grouped by region
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RegionGroup"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +131,136 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Site:
+      type: object
+      required: [id, name, arabicName, region, country, latitude, longitude, category, shortDescription, yearFounded, significance]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          description: English name of the site
+        arabicName:
+          type: string
+          description: Arabic name of the site
+        region:
+          type: string
+          description: Geographic region (e.g. Arabian Peninsula, North Africa, South Asia)
+        country:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        category:
+          type: string
+          description: mosque, shrine, palace, fortress, city
+        shortDescription:
+          type: string
+        yearFounded:
+          type: ["string", "null"]
+        significance:
+          type: string
+          description: Brief note on Islamic historical significance
+        isFeatured:
+          type: boolean
+        imageUrl:
+          type: ["string", "null"]
+
+    Hotspot:
+      type: object
+      required: [id, siteId, label, description, positionX, positionY, positionZ]
+      properties:
+        id:
+          type: integer
+        siteId:
+          type: integer
+        label:
+          type: string
+          description: Name of the architectural feature (e.g. Minaret, Green Dome)
+        description:
+          type: string
+          description: Detailed description shown when user clicks the hotspot
+        positionX:
+          type: number
+          format: double
+          description: X position on the 3D model (normalized -1 to 1)
+        positionY:
+          type: number
+          format: double
+          description: Y position on the 3D model (normalized -1 to 1)
+        positionZ:
+          type: number
+          format: double
+          description: Z position on the 3D model (normalized -1 to 1)
+        arabicTerm:
+          type: ["string", "null"]
+          description: Arabic term for this feature
+        historicalPeriod:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+
+    SiteDetail:
+      type: object
+      required: [id, name, arabicName, region, country, latitude, longitude, category, shortDescription, fullDescription, yearFounded, significance, hotspots]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        arabicName:
+          type: string
+        region:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        category:
+          type: string
+        shortDescription:
+          type: string
+        fullDescription:
+          type: string
+        yearFounded:
+          type: ["string", "null"]
+        significance:
+          type: string
+        isFeatured:
+          type: boolean
+        imageUrl:
+          type: ["string", "null"]
+        architecturalStyle:
+          type: ["string", "null"]
+        hotspots:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hotspot"
+
+    RegionGroup:
+      type: object
+      required: [region, count, sites]
+      properties:
+        region:
+          type: string
+        count:
+          type: integer
+        sites:
+          type: array
+          items:
+            $ref: "#/components/schemas/Site"
