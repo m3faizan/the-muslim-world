@@ -398,7 +398,7 @@ export default function SiteDetail() {
                 <OrbitControls
                   enablePan={false}
                   minDistance={1}
-                  maxDistance={20}
+                  maxDistance={100}
                   autoRotate
                   autoRotateSpeed={0.4}
                 />
