@@ -350,7 +350,7 @@ export default function SiteDetail() {
       <div className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full px-4 py-6 gap-6">
         {/* 3D Viewer */}
         <div className="flex-1 flex flex-col gap-4">
-          <div className="relative rounded-2xl overflow-hidden border border-border bg-card" style={{ height: "480px" }}>
+          <div className="relative rounded-2xl overflow-hidden border border-border bg-card flex-1 min-h-[480px]">
 
             {/* Status badge — top left */}
             <div className="absolute top-3 left-3 z-10 pointer-events-none">
