@@ -26,7 +26,7 @@ const SITE_PHOTOS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  mosque: "#c9a227",
+  mosque: "#39b163",
   shrine: "#3bb5a0",
   palace: "#9b7dc8",
   fortress: "#c87840",
@@ -58,12 +58,12 @@ const REGION_ARABIC: Record<string, string> = {
 
 function SiteCard({ site, wide = false }: { site: any; wide?: boolean }) {
   const photo = SITE_PHOTOS[site.name];
-  const accentColor = CATEGORY_COLORS[site.category] ?? "#c9a227";
+  const accentColor = CATEGORY_COLORS[site.category] ?? "#39b163";
 
   return (
     <Link href={`/site/${site.id}`}>
       <div
-        className={`group relative overflow-hidden cursor-pointer border border-[#1c2530] hover:border-[#c9a227]/40 transition-all duration-300 ${wide ? "h-[480px]" : "h-[300px]"}`}
+        className={`group relative overflow-hidden cursor-pointer border border-[#1c2530] hover:border-[#39b163]/40 transition-all duration-300 ${wide ? "h-[480px]" : "h-[300px]"}`}
         style={{ borderRadius: "2px" }}
       >
         {/* Photo or pattern fallback */}
@@ -103,7 +103,7 @@ function SiteCard({ site, wide = false }: { site: any; wide?: boolean }) {
           <p className="text-[11px] font-mono tracking-[0.12em] text-[#6b8099] uppercase mb-2">
             {site.country} · {site.region}
           </p>
-          <h3 className={`font-bold text-white leading-tight mb-2 group-hover:text-[#c9a227] transition-colors ${wide ? "text-2xl" : "text-lg"}`}>
+          <h3 className={`font-bold text-white leading-tight mb-2 group-hover:text-[#39b163] transition-colors ${wide ? "text-2xl" : "text-lg"}`}>
             {site.name}
           </h3>
           <p className="text-[13px] text-[#7a90a8] leading-relaxed line-clamp-2">
@@ -145,7 +145,7 @@ export default function Home() {
   const totalSites = regions.reduce((sum, r) => sum + r.count, 0);
 
   return (
-    <div className="min-h-screen text-[#d8e0ea]" style={{ background: "#05080c", fontFamily: "Inter, 'Segoe UI', sans-serif" }}>
+    <div className="min-h-screen text-[#d8e0ea]" style={{ background: "#05080c", fontFamily: "'IBM Plex Mono', 'Menlo', monospace" }}>
 
       {/* ── NAVIGATION ─────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 h-14 border-b" style={{ background: "rgba(5,8,12,0.92)", borderColor: "#1c2530", backdropFilter: "blur(12px)" }}>
@@ -153,29 +153,29 @@ export default function Home() {
           <div className="flex items-center gap-3 cursor-pointer">
             <div className="relative w-7 h-7 flex items-center justify-center">
               <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="30,4 34.2,19.8 48.4,11.6 40.2,25.8 56,30 40.2,34.2 48.4,48.4 34.2,40.2 30,56 25.8,40.2 11.6,48.4 19.8,34.2 4,30 19.8,25.8 11.6,11.6 25.8,19.8" fill="none" stroke="#c9a227" strokeWidth="1.5" />
+                <polygon points="30,4 34.2,19.8 48.4,11.6 40.2,25.8 56,30 40.2,34.2 48.4,48.4 34.2,40.2 30,56 25.8,40.2 11.6,48.4 19.8,34.2 4,30 19.8,25.8 11.6,11.6 25.8,19.8" fill="none" stroke="#39b163" strokeWidth="1.5" />
               </svg>
             </div>
             <div>
-              <div className="text-xs font-mono tracking-[0.2em] text-[#c9a227] uppercase leading-none">The Muslim World</div>
+              <div className="text-xs font-mono tracking-[0.2em] text-[#39b163] uppercase leading-none">The Muslim World</div>
               <div className="text-[10px] font-mono tracking-[0.15em] text-[#3d5066] uppercase leading-none mt-0.5">Heritage Archive</div>
             </div>
           </div>
         </Link>
         <div className="flex items-center gap-4">
           <Link href="/explore">
-            <span className="text-[13px] font-mono tracking-[0.08em] text-[#6b8099] hover:text-[#c9a227] transition-colors cursor-pointer uppercase">Explore Map</span>
+            <span className="text-[13px] font-mono tracking-[0.08em] text-[#6b8099] hover:text-[#39b163] transition-colors cursor-pointer uppercase">Explore Map</span>
           </Link>
           {user ? (
             <>
               <Link href="/tracker">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-mono tracking-[0.08em] uppercase transition-all hover:text-[#c9a227]" style={{ color: "#6b8099" }}>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-mono tracking-[0.08em] uppercase transition-all hover:text-[#39b163]" style={{ color: "#6b8099" }}>
                   <BookOpen className="w-3.5 h-3.5" />
                   My Journey
                 </button>
               </Link>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded" style={{ background: "#0c1a28", border: "1px solid #1a2a3a" }}>
-                <User className="w-3.5 h-3.5" style={{ color: "#c9a227" }} />
+                <User className="w-3.5 h-3.5" style={{ color: "#39b163" }} />
                 <span className="text-[12px] font-mono" style={{ color: "#d8e0ea" }}>{user.displayName}</span>
                 <button onClick={() => logout()} title="Sign out">
                   <LogOut className="w-3.5 h-3.5 ml-1" style={{ color: "#5a7a9a" }} />
@@ -184,7 +184,7 @@ export default function Home() {
             </>
           ) : (
             <Link href="/auth">
-              <button className="flex items-center gap-2 px-4 py-1.5 text-[12px] font-mono tracking-[0.08em] uppercase transition-all hover:bg-[#c9a227]/10" style={{ border: "1px solid #c9a22760", color: "#c9a227", borderRadius: "2px" }}>
+              <button className="flex items-center gap-2 px-4 py-1.5 text-[12px] font-mono tracking-[0.08em] uppercase transition-all hover:bg-[#39b163]/10" style={{ border: "1px solid #39b16360", color: "#39b163", borderRadius: "2px" }}>
                 <User className="w-3.5 h-3.5" />
                 Sign In
               </button>
@@ -192,8 +192,8 @@ export default function Home() {
           )}
           <Link href="/explore">
             <button
-              className="flex items-center gap-2 px-5 py-2 text-[12px] font-mono tracking-[0.1em] uppercase transition-all hover:bg-[#c9a227]/10"
-              style={{ border: "1px solid #c9a227", color: "#c9a227", borderRadius: "2px" }}
+              className="flex items-center gap-2 px-5 py-2 text-[12px] font-mono tracking-[0.1em] uppercase transition-all hover:bg-[#39b163]/10"
+              style={{ border: "1px solid #39b163", color: "#39b163", borderRadius: "2px" }}
             >
               <Map className="w-3.5 h-3.5" />
               Launch Map
@@ -233,7 +233,7 @@ export default function Home() {
         <div className="absolute inset-0 islamic-pattern-bg opacity-20 pointer-events-none" style={{ zIndex: 3 }} />
 
         {/* Vertical gold line — decorative structural element */}
-        <div className="absolute left-8 top-24 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, #c9a227, #c9a22700)", zIndex: 4 }} />
+        <div className="absolute left-8 top-24 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, #39b163, #39b16300)", zIndex: 4 }} />
 
         {/* Photo credit — bottom right */}
         <div className="absolute bottom-[88px] right-6 z-10 pointer-events-none">
@@ -245,7 +245,7 @@ export default function Home() {
                 style={{
                   width: i === heroIndex ? "20px" : "4px",
                   height: "2px",
-                  background: i === heroIndex ? "#c9a227" : "#2a3a4d",
+                  background: i === heroIndex ? "#39b163" : "#2a3a4d",
                   borderRadius: "1px",
                 }}
               />
@@ -260,14 +260,14 @@ export default function Home() {
           <div className="col-span-12 lg:col-span-7">
             {/* Classification label */}
             <div className="flex items-center gap-3 mb-10">
-              <div className="w-3 h-px" style={{ background: "#c9a227" }} />
-              <span className="text-[11px] font-mono tracking-[0.25em] uppercase" style={{ color: "#c9a227" }}>
+              <div className="w-3 h-px" style={{ background: "#39b163" }} />
+              <span className="text-[11px] font-mono tracking-[0.25em] uppercase" style={{ color: "#39b163" }}>
                 Heritage Intelligence — Est. 622 CE
               </span>
             </div>
 
             {/* Arabic inscription */}
-            <div className="font-arabic text-4xl mb-4 opacity-30 pointer-events-none select-none" dir="rtl" style={{ color: "#c9a227" }}>
+            <div className="font-arabic text-4xl mb-4 opacity-30 pointer-events-none select-none" dir="rtl" style={{ color: "#39b163" }}>
               بسم الله الرحمن الرحيم
             </div>
 
@@ -277,11 +277,11 @@ export default function Home() {
               style={{ fontSize: "clamp(2.8rem, 6vw, 5.5rem)", color: "#edf2f7", letterSpacing: "-0.02em" }}
             >
               Fourteen Centuries<br />
-              <span style={{ color: "#c9a227" }}>of Islamic Civilization</span>
+              <span style={{ color: "#39b163" }}>of Islamic Civilization</span>
             </h1>
 
             {/* Arabic subtitle */}
-            <p className="font-arabic text-2xl mb-5 tracking-wide" dir="rtl" style={{ color: "#c9a22780" }}>
+            <p className="font-arabic text-2xl mb-5 tracking-wide" dir="rtl" style={{ color: "#39b16380" }}>
               العالم الإسلامي
             </p>
 
@@ -293,7 +293,7 @@ export default function Home() {
               <Link href="/explore">
                 <button
                   className="flex items-center gap-2.5 px-7 py-3.5 text-[13px] font-mono tracking-[0.12em] uppercase transition-all hover:brightness-110"
-                  style={{ background: "#c9a227", color: "#05080c", borderRadius: "2px", fontWeight: 700 }}
+                  style={{ background: "#39b163", color: "#05080c", borderRadius: "2px", fontWeight: 700 }}
                 >
                   <Map className="w-4 h-4" />
                   Explore the Map
@@ -322,9 +322,9 @@ export default function Home() {
               <div
                 key={i}
                 className="border-r-2 pr-4 transition-all"
-                style={{ borderColor: i === 0 ? "#c9a227" : "#1c2530", opacity: i === 0 ? 1 : 0.45 }}
+                style={{ borderColor: i === 0 ? "#39b163" : "#1c2530", opacity: i === 0 ? 1 : 0.45 }}
               >
-                <p className="font-arabic text-xl leading-none" style={{ color: i === 0 ? "#c9a227" : "#3d5066" }} dir="rtl">{item.ar}</p>
+                <p className="font-arabic text-xl leading-none" style={{ color: i === 0 ? "#39b163" : "#3d5066" }} dir="rtl">{item.ar}</p>
                 <p className="text-[11px] font-mono tracking-[0.12em] uppercase mt-1" style={{ color: i === 0 ? "#8a9eb5" : "#2d3f52" }}>{item.en}</p>
                 <p className="text-[10px] font-mono" style={{ color: "#2d3f52" }}>{item.sub}</p>
               </div>
@@ -342,7 +342,7 @@ export default function Home() {
               { value: "1,400", label: "Years of History", sub: "610 CE to present" },
             ].map((s, i) => (
               <div key={i} className="px-6 py-5 border-r last:border-r-0" style={{ borderColor: "#1c2530" }}>
-                <div className="text-3xl font-mono font-bold" style={{ color: "#c9a227", letterSpacing: "-0.03em" }}>{s.value}</div>
+                <div className="text-3xl font-mono font-bold" style={{ color: "#39b163", letterSpacing: "-0.03em" }}>{s.value}</div>
                 <div className="text-[12px] font-medium mt-0.5" style={{ color: "#d8e0ea" }}>{s.label}</div>
                 <div className="text-[11px] font-mono mt-0.5" style={{ color: "#3d5066" }}>{s.sub}</div>
               </div>
@@ -354,7 +354,7 @@ export default function Home() {
       {/* ── BROADCAST STRIP ─────────────────────────────────────── */}
       <div className="border-b" style={{ borderColor: "#1c2530", background: "#070c10" }}>
         <div className="max-w-7xl mx-auto px-8 py-3 flex items-center gap-6 overflow-hidden">
-          <span className="text-[10px] font-mono tracking-[0.2em] uppercase flex-shrink-0" style={{ color: "#c9a227" }}>// ARCHIVE STATUS</span>
+          <span className="text-[10px] font-mono tracking-[0.2em] uppercase flex-shrink-0" style={{ color: "#39b163" }}>// ARCHIVE STATUS</span>
           <div className="flex items-center gap-8 overflow-x-auto scrollbar-none">
             {[
               `${totalSites || 15} SITES CATALOGUED`,
@@ -375,13 +375,13 @@ export default function Home() {
       <section id="sites" className="py-20 px-8 max-w-7xl mx-auto">
         <div className="flex items-end justify-between mb-10 border-b pb-5" style={{ borderColor: "#1c2530" }}>
           <div>
-            <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-2" style={{ color: "#c9a227" }}>// Featured Sites</p>
+            <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-2" style={{ color: "#39b163" }}>// Featured Sites</p>
             <h2 className="text-3xl font-bold" style={{ color: "#edf2f7", letterSpacing: "-0.02em" }}>Iconic Landmarks</h2>
             <p className="font-arabic text-base mt-1" style={{ color: "#3d5066" }} dir="rtl">المواقع المميزة</p>
           </div>
           <Link href="/explore">
             <button
-              className="flex items-center gap-2 text-[12px] font-mono tracking-[0.1em] uppercase transition-all hover:text-[#c9a227]"
+              className="flex items-center gap-2 text-[12px] font-mono tracking-[0.1em] uppercase transition-all hover:text-[#39b163]"
               style={{ color: "#3d5066" }}
             >
               View All Sites
@@ -419,7 +419,7 @@ export default function Home() {
       <section className="py-20 px-8 border-t" style={{ borderColor: "#1c2530", background: "#060a0e" }}>
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
-            <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-2" style={{ color: "#c9a227" }}>// Historical Record</p>
+            <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-2" style={{ color: "#39b163" }}>// Historical Record</p>
             <h2 className="text-3xl font-bold" style={{ color: "#edf2f7", letterSpacing: "-0.02em" }}>Key Moments in Islamic History</h2>
           </div>
 
@@ -431,7 +431,7 @@ export default function Home() {
                 style={{ borderColor: "#131c25" }}
               >
                 <div className="col-span-12 sm:col-span-2">
-                  <span className="text-[13px] font-mono font-bold" style={{ color: "#c9a227" }}>{item.year}</span>
+                  <span className="text-[13px] font-mono font-bold" style={{ color: "#39b163" }}>{item.year}</span>
                 </div>
                 <div className="col-span-12 sm:col-span-3">
                   <span className="text-[11px] font-mono tracking-[0.08em] uppercase" style={{ color: "#3d5066" }}>{item.loc}</span>
@@ -449,7 +449,7 @@ export default function Home() {
       <section className="py-20 px-8 border-t" style={{ borderColor: "#1c2530" }}>
         <div className="max-w-7xl mx-auto">
           <div className="mb-10">
-            <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-2" style={{ color: "#c9a227" }}>// Geographic Distribution</p>
+            <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-2" style={{ color: "#39b163" }}>// Geographic Distribution</p>
             <h2 className="text-3xl font-bold" style={{ color: "#edf2f7", letterSpacing: "-0.02em" }}>Explore by Region</h2>
           </div>
 
@@ -468,13 +468,13 @@ export default function Home() {
             {regions.map((group, i) => (
               <Link key={group.region} href="/explore">
                 <div
-                  className="grid grid-cols-12 gap-4 px-5 py-4 border-b last:border-b-0 cursor-pointer group transition-all hover:bg-[#c9a227]/[0.04]"
+                  className="grid grid-cols-12 gap-4 px-5 py-4 border-b last:border-b-0 cursor-pointer group transition-all hover:bg-[#39b163]/[0.04]"
                   style={{ borderColor: "#131c25" }}
                 >
                   <span className="col-span-1 text-[11px] font-mono" style={{ color: "#2a3a4d" }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="col-span-4 text-[14px] font-medium group-hover:text-[#c9a227] transition-colors" style={{ color: "#c8d4e0" }}>
+                  <span className="col-span-4 text-[14px] font-medium group-hover:text-[#39b163] transition-colors" style={{ color: "#c8d4e0" }}>
                     {group.region}
                   </span>
                   <span className="col-span-3 font-arabic text-base" dir="rtl" style={{ color: "#3d5066" }}>
@@ -484,13 +484,13 @@ export default function Home() {
                     <div className="flex-1 h-1 rounded-sm overflow-hidden" style={{ background: "#1c2530" }}>
                       <div
                         className="h-full"
-                        style={{ width: `${(group.count / Math.max(...regions.map(r => r.count))) * 100}%`, background: "#c9a227", opacity: 0.7 }}
+                        style={{ width: `${(group.count / Math.max(...regions.map(r => r.count))) * 100}%`, background: "#39b163", opacity: 0.7 }}
                       />
                     </div>
                     <span className="text-[12px] font-mono" style={{ color: "#6b8099" }}>{group.count}</span>
                   </div>
                   <div className="col-span-2 flex justify-end items-center">
-                    <span className="text-[11px] font-mono tracking-[0.1em] uppercase opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1" style={{ color: "#c9a227" }}>
+                    <span className="text-[11px] font-mono tracking-[0.1em] uppercase opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1" style={{ color: "#39b163" }}>
                       View <ArrowRight className="w-3 h-3" />
                     </span>
                   </div>
@@ -508,16 +508,16 @@ export default function Home() {
             className="border p-8 mb-10 text-left font-mono text-[13px] leading-7"
             style={{ borderColor: "#1c2530", background: "#070c10", borderRadius: "2px" }}
           >
-            <p style={{ color: "#3d5066" }}>$ <span style={{ color: "#c9a227" }}>explore</span><span style={{ color: "#6b8099" }}> --platform web --region global --sites all</span></p>
+            <p style={{ color: "#3d5066" }}>$ <span style={{ color: "#39b163" }}>explore</span><span style={{ color: "#6b8099" }}> --platform web --region global --sites all</span></p>
             <p style={{ color: "#3d5066" }}>↳ Loading {totalSites || 15} heritage sites across {regions.length || 6} regions…</p>
             <p style={{ color: "#3d5066" }}>↳ Activating interactive map with 3D model support…</p>
             <p className="mt-1">
               <span style={{ color: "#3bb5a0" }}>✓ Ready.</span>
-              <span className="inline-block w-2 h-4 ml-1 align-middle animate-pulse" style={{ background: "#c9a227" }} />
+              <span className="inline-block w-2 h-4 ml-1 align-middle animate-pulse" style={{ background: "#39b163" }} />
             </p>
           </div>
 
-          <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-4" style={{ color: "#c9a227" }}>// Begin Exploration</p>
+          <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-4" style={{ color: "#39b163" }}>// Begin Exploration</p>
           <h2 className="text-3xl font-bold mb-4" style={{ color: "#edf2f7", letterSpacing: "-0.02em" }}>Discover the Islamic World</h2>
           <p className="text-[15px] leading-relaxed mb-8 max-w-xl mx-auto" style={{ color: "#5a7080" }}>
             Navigate an interactive map, explore 3D architectural models, and read the history of each site — from the Kaaba to the Alhambra.
@@ -526,7 +526,7 @@ export default function Home() {
           <Link href="/explore">
             <button
               className="inline-flex items-center gap-3 px-8 py-4 text-[13px] font-mono tracking-[0.15em] uppercase font-bold transition-all hover:brightness-110 active:scale-[0.99]"
-              style={{ background: "#c9a227", color: "#05080c", borderRadius: "2px" }}
+              style={{ background: "#39b163", color: "#05080c", borderRadius: "2px" }}
             >
               <Map className="w-4 h-4" />
               Launch Interactive Map
@@ -540,7 +540,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <svg width="20" height="20" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="30,4 34.2,19.8 48.4,11.6 40.2,25.8 56,30 40.2,34.2 48.4,48.4 34.2,40.2 30,56 25.8,40.2 11.6,48.4 19.8,34.2 4,30 19.8,25.8 11.6,11.6 25.8,19.8" fill="none" stroke="#c9a227" strokeWidth="1.5" opacity="0.6" />
+              <polygon points="30,4 34.2,19.8 48.4,11.6 40.2,25.8 56,30 40.2,34.2 48.4,48.4 34.2,40.2 30,56 25.8,40.2 11.6,48.4 19.8,34.2 4,30 19.8,25.8 11.6,11.6 25.8,19.8" fill="none" stroke="#39b163" strokeWidth="1.5" opacity="0.6" />
             </svg>
             <span className="text-[11px] font-mono tracking-[0.15em] uppercase" style={{ color: "#2a3a4d" }}>The Muslim World — Heritage Archive</span>
           </div>

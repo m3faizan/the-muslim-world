@@ -56,69 +56,69 @@
 }
 
 :root {
-  --button-outline: rgba(212, 175, 55, 0.20);
-  --badge-outline: rgba(212, 175, 55, 0.10);
+  --button-outline: rgba(57, 177, 99, 0.20);
+  --badge-outline: rgba(57, 177, 99, 0.10);
   --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(212, 175, 55, 0.05);
-  --elevate-2: rgba(212, 175, 55, 0.10);
+  --elevate-1: rgba(57, 177, 99, 0.05);
+  --elevate-2: rgba(57, 177, 99, 0.10);
 
-  /* Deep navy background — night sky */
-  --background: 222 47% 8%;
-  --foreground: 45 40% 92%;
+  /* Deep near-black background — intelligence terminal */
+  --background: 220 20% 6%;
+  --foreground: 0 0% 92%;
 
-  --border: 222 30% 18%;
-  --input: 222 30% 18%;
-  --ring: 43 74% 55%;
+  --border: 220 15% 18%;
+  --input: 220 15% 18%;
+  --ring: 142 54% 48%;
 
   /* Card — slightly lighter than background */
-  --card: 222 40% 11%;
-  --card-foreground: 45 40% 92%;
-  --card-border: 222 30% 20%;
+  --card: 220 18% 9%;
+  --card-foreground: 0 0% 92%;
+  --card-border: 220 15% 20%;
 
   /* Popover */
-  --popover: 222 40% 11%;
-  --popover-foreground: 45 40% 92%;
-  --popover-border: 222 30% 20%;
+  --popover: 220 18% 9%;
+  --popover-foreground: 0 0% 92%;
+  --popover-border: 220 15% 20%;
 
   /* Sidebar */
-  --sidebar: 222 47% 7%;
-  --sidebar-foreground: 45 40% 85%;
-  --sidebar-border: 222 30% 16%;
-  --sidebar-primary: 43 74% 55%;
-  --sidebar-primary-foreground: 222 47% 8%;
+  --sidebar: 220 20% 5%;
+  --sidebar-foreground: 0 0% 85%;
+  --sidebar-border: 220 15% 16%;
+  --sidebar-primary: 142 54% 48%;
+  --sidebar-primary-foreground: 220 20% 6%;
   --sidebar-accent: 174 60% 30%;
-  --sidebar-accent-foreground: 45 40% 92%;
-  --sidebar-ring: 43 74% 55%;
+  --sidebar-accent-foreground: 0 0% 92%;
+  --sidebar-ring: 142 54% 48%;
 
-  /* Gold — the primary accent */
-  --primary: 43 74% 55%;
-  --primary-foreground: 222 47% 8%;
+  /* Green — the primary accent */
+  --primary: 142 54% 48%;
+  --primary-foreground: 220 20% 6%;
 
   /* Teal — secondary accent */
   --secondary: 174 60% 30%;
-  --secondary-foreground: 45 40% 92%;
+  --secondary-foreground: 0 0% 92%;
 
   /* Muted */
-  --muted: 222 30% 16%;
-  --muted-foreground: 45 20% 60%;
+  --muted: 220 15% 14%;
+  --muted-foreground: 0 0% 55%;
 
   /* Accent */
-  --accent: 174 60% 25%;
-  --accent-foreground: 45 40% 92%;
+  --accent: 174 60% 22%;
+  --accent-foreground: 0 0% 92%;
 
   /* Destructive */
   --destructive: 0 65% 50%;
-  --destructive-foreground: 45 40% 92%;
+  --destructive-foreground: 0 0% 92%;
 
-  /* Custom */
+  /* Custom — keep gold for Arabic / decorative use */
   --gold: 43 74% 55%;
-  --gold-foreground: 222 47% 8%;
+  --gold-foreground: 220 20% 6%;
   --teal: 174 60% 40%;
-  --teal-foreground: 222 47% 8%;
+  --teal-foreground: 220 20% 6%;
 
-  --app-font-sans: 'Inter', 'Segoe UI', sans-serif;
-  --app-font-serif: 'Georgia', serif;
-  --app-font-mono: 'Menlo', monospace;
+  --app-font-sans: 'IBM Plex Mono', 'Menlo', monospace;
+  --app-font-serif: 'IBM Plex Mono', 'Menlo', monospace;
+  --app-font-mono: 'IBM Plex Mono', 'Menlo', monospace;
   --app-font-arabic: 'Amiri', 'Scheherazade New', serif;
   --radius: 0.5rem;
 
@@ -129,12 +129,12 @@
   --shadow-xl: 0 16px 48px rgba(0,0,0,0.7);
   --shadow-2xl: 0 24px 64px rgba(0,0,0,0.8);
 
-  --primary-border: hsl(43 74% 47%);
+  --primary-border: hsl(142 54% 38%);
   --secondary-border: hsl(174 60% 22%);
-  --muted-border: hsl(222 30% 22%);
-  --accent-border: hsl(174 60% 20%);
+  --muted-border: hsl(220 15% 22%);
+  --accent-border: hsl(174 60% 18%);
   --destructive-border: hsl(0 65% 42%);
-  --sidebar-primary-border: hsl(43 74% 47%);
+  --sidebar-primary-border: hsl(142 54% 38%);
   --sidebar-accent-border: hsl(174 60% 22%);
 
   --tracking-normal: 0em;
@@ -148,8 +148,8 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     background-image:
-      radial-gradient(ellipse at 20% 50%, hsl(174 60% 10% / 0.3) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, hsl(43 74% 15% / 0.15) 0%, transparent 40%);
+      radial-gradient(ellipse at 20% 50%, hsl(142 54% 10% / 0.25) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, hsl(142 54% 8% / 0.15) 0%, transparent 40%);
   }
 }
 
@@ -202,9 +202,9 @@
   background-size: 80px 80px;
 }
 
-/* Gold glow effect */
+/* Gold glow effect (kept for Arabic decorative elements) */
 .gold-glow {
-  box-shadow: 0 0 20px hsl(43 74% 55% / 0.3), 0 0 60px hsl(43 74% 55% / 0.1);
+  box-shadow: 0 0 20px hsl(142 54% 48% / 0.3), 0 0 60px hsl(142 54% 48% / 0.1);
 }
 
 .teal-glow {
