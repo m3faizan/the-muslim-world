@@ -2,7 +2,7 @@ import { useState, useRef, Suspense } from "react";
 import { useRoute, Link } from "wouter";
 import { useGetSite } from "@workspace/api-client-react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Html, useGLTF, Center } from "@react-three/drei";
+import { OrbitControls, Html, useGLTF, Center, Bounds } from "@react-three/drei";
 import * as THREE from "three";
 import {
   MapPin,
@@ -453,7 +453,7 @@ export default function SiteDetail() {
             >
               <Canvas
                 shadows
-                camera={{ position: [4, 3, 5], fov: 45 }}
+                camera={{ fov: 45 }}
                 gl={{ antialias: true }}
               >
                 <color attach="background" args={["#0d1117"]} />
@@ -463,29 +463,31 @@ export default function SiteDetail() {
                 <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
 
                 <Suspense fallback={null}>
-                  {site.modelUrl ? (
-                    <GltfMesh
-                      url={site.modelUrl}
-                      hotspots={hotspots}
-                      onHotspotClick={setActiveHotspot}
-                      activeHotspot={activeHotspot}
-                    />
-                  ) : (
-                    <MosqueMesh
-                      hotspots={hotspots}
-                      onHotspotClick={setActiveHotspot}
-                      activeHotspot={activeHotspot}
-                    />
-                  )}
+                  <Bounds fit clip observe margin={1.3}>
+                    {site.modelUrl ? (
+                      <GltfMesh
+                        url={site.modelUrl}
+                        hotspots={hotspots}
+                        onHotspotClick={setActiveHotspot}
+                        activeHotspot={activeHotspot}
+                      />
+                    ) : (
+                      <MosqueMesh
+                        hotspots={hotspots}
+                        onHotspotClick={setActiveHotspot}
+                        activeHotspot={activeHotspot}
+                      />
+                    )}
+                  </Bounds>
                 </Suspense>
 
                 <OrbitControls
                   ref={orbitRef}
                   enableRotate={activeTool === "rotate"}
-                  enableZoom={activeTool === "zoom"}
+                  enableZoom={activeTool !== null}
                   enablePan={activeTool === "pan"}
-                  minDistance={1}
-                  maxDistance={100}
+                  minDistance={0.5}
+                  maxDistance={500}
                 />
               </Canvas>
             </GlobeErrorBoundary>
