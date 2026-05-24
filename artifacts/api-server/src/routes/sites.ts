@@ -57,7 +57,7 @@ router.get("/sites/:id", async (req, res) => {
     const { id } = GetSiteParams.parse({ id: Number(req.params.id) });
     const [site] = await db.select().from(sitesTable).where(eq(sitesTable.id, id));
     if (!site) {
-      return res.status(404).json({ error: "Site not found" });
+      res.status(404).json({ error: "Site not found" }); return;
     }
     const hotspots = await db.select().from(hotspotsTable).where(eq(hotspotsTable.siteId, id));
     res.json({ ...formatSiteDetail(site), hotspots: hotspots.map(formatHotspot) });

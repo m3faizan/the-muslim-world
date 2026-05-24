@@ -1,4 +1,4 @@
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRoute, Link } from "wouter";
 import { useGetSite } from "@workspace/api-client-react";
 import { Canvas } from "@react-three/fiber";
@@ -19,8 +19,14 @@ import {
   RotateCcw,
   Lock,
   Unlock,
+  CheckCircle2,
+  BookOpen,
+  User,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { GlobeErrorBoundary } from "@/components/GlobeErrorBoundary";
+import { useAuth } from "@/context/AuthContext";
 
 type Hotspot = {
   id: number;
@@ -253,10 +259,22 @@ function GltfMesh({
 export default function SiteDetail() {
   const [, params] = useRoute("/site/:id");
   const siteId = Number(params?.id);
+  const { user } = useAuth();
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
   const [activeTool, setActiveTool] = useState<"rotate" | "zoom" | "pan" | null>(null);
   const orbitRef = useRef<any>(null);
+
+  // Visited / prayed tracking
+  const [siteLog, setSiteLog] = useState<{ visited: boolean; prayed: boolean } | null>(null);
+  const [logLoading, setLogLoading] = useState(false);
+
+  // Admin annotation
+  const [annotateMode, setAnnotateMode] = useState(false);
+  const [pendingPos, setPendingPos] = useState<{ x: number; y: number; z: number } | null>(null);
+  const [annotForm, setAnnotForm] = useState({ label: "", description: "", arabicTerm: "", historicalPeriod: "" });
+  const [annotSaving, setAnnotSaving] = useState(false);
+  const [localHotspots, setLocalHotspots] = useState<Hotspot[]>([]);
 
   const toggleTool = (tool: "rotate" | "zoom" | "pan") => {
     setActiveTool((prev) => (prev === tool ? null : tool));
@@ -265,6 +283,69 @@ export default function SiteDetail() {
   const { data: site, isLoading, error } = useGetSite(siteId, {
     query: { enabled: !!siteId, queryKey: ["getSite", siteId] },
   });
+
+  useEffect(() => {
+    if (site) setLocalHotspots((site as any).hotspots ?? []);
+  }, [site]);
+
+  useEffect(() => {
+    if (!user || !siteId) return;
+    fetch("/api/auth/logs", { credentials: "include" })
+      .then((r) => r.json())
+      .then((logs: any[]) => {
+        const log = logs.find((l) => l.siteId === siteId);
+        setSiteLog(log ? { visited: log.visited, prayed: log.prayed } : { visited: false, prayed: false });
+      });
+  }, [user, siteId]);
+
+  const toggleLog = async (field: "visited" | "prayed") => {
+    if (!user || !siteId) return;
+    setLogLoading(true);
+    const current = siteLog?.[field] ?? false;
+    const res = await fetch(`/api/auth/logs/${siteId}`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [field]: !current }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setSiteLog({ visited: data.visited, prayed: data.prayed });
+    }
+    setLogLoading(false);
+  };
+
+  const saveAnnotation = async () => {
+    if (!pendingPos || !annotForm.label || !annotForm.description) return;
+    setAnnotSaving(true);
+    const res = await fetch(`/api/sites/${siteId}/hotspots`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        label: annotForm.label,
+        description: annotForm.description,
+        positionX: pendingPos.x,
+        positionY: pendingPos.y,
+        positionZ: pendingPos.z,
+        arabicTerm: annotForm.arabicTerm || undefined,
+        historicalPeriod: annotForm.historicalPeriod || undefined,
+      }),
+    });
+    if (res.ok) {
+      const hotspot: Hotspot = await res.json();
+      setLocalHotspots((prev) => [...prev, hotspot]);
+      setPendingPos(null);
+      setAnnotForm({ label: "", description: "", arabicTerm: "", historicalPeriod: "" });
+    }
+    setAnnotSaving(false);
+  };
+
+  const deleteHotspot = async (id: number) => {
+    await fetch(`/api/sites/${siteId}/hotspots/${id}`, { method: "DELETE", credentials: "include" });
+    setLocalHotspots((prev) => prev.filter((h) => h.id !== id));
+    if (activeHotspot?.id === id) setActiveHotspot(null);
+  };
 
   if (isLoading) {
     return (
@@ -289,7 +370,7 @@ export default function SiteDetail() {
     );
   }
 
-  const hotspots: Hotspot[] = (site as any).hotspots ?? [];
+  const hotspots = localHotspots;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col page-enter">
@@ -438,7 +519,35 @@ export default function SiteDetail() {
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
+
+              {/* Admin annotation toggle */}
+              {user?.isAdmin && (
+                <>
+                  <div className="w-6 h-px bg-border" />
+                  <button
+                    onClick={() => { setAnnotateMode(!annotateMode); setPendingPos(null); }}
+                    title="Add annotation"
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+                      annotateMode
+                        ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                        : "text-muted-foreground hover:text-foreground hover:bg-card"
+                    }`}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </>
+              )}
             </div>
+
+            {/* Admin annotation banner */}
+            {annotateMode && (
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium" style={{ background: "#1a1200", border: "1px solid #c9a22760", color: "#c9a227" }}>
+                  <Plus className="w-3 h-3" />
+                  Click anywhere on the model to place a hotspot
+                </div>
+              </div>
+            )}
 
             <GlobeErrorBoundary
               fallback={
@@ -455,6 +564,12 @@ export default function SiteDetail() {
                 shadows
                 camera={{ fov: 45 }}
                 gl={{ antialias: true }}
+                onPointerDown={(e: any) => {
+                  if (!annotateMode) return;
+                  if (e.point) {
+                    setPendingPos({ x: e.point.x, y: e.point.y, z: e.point.z });
+                  }
+                }}
               >
                 <color attach="background" args={["#0d1117"]} />
                 <ambientLight intensity={0.6} />
@@ -531,6 +646,113 @@ export default function SiteDetail() {
 
         {/* Info panel */}
         <div className="lg:w-80 flex flex-col gap-4">
+
+          {/* ── Visited / Prayed tracker ── */}
+          {user ? (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">My Record</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => toggleLog("visited")}
+                  disabled={logLoading}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all border ${
+                    siteLog?.visited
+                      ? "bg-primary/15 border-primary/50 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {siteLog?.visited ? "Visited ✓" : "Mark Visited"}
+                </button>
+                <button
+                  onClick={() => toggleLog("prayed")}
+                  disabled={logLoading}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all border ${
+                    siteLog?.prayed
+                      ? "bg-secondary/15 border-secondary/50 text-secondary"
+                      : "border-border text-muted-foreground hover:border-secondary/40 hover:text-foreground"
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  {siteLog?.prayed ? "Prayed ✓" : "Mark Prayed"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-border bg-card p-4 text-center">
+              <p className="text-xs text-muted-foreground mb-2">Sign in to track your visits and prayers</p>
+              <Link href="/auth">
+                <button className="text-xs text-primary flex items-center gap-1 mx-auto hover:underline">
+                  <User className="w-3 h-3" /> Create an account
+                </button>
+              </Link>
+            </div>
+          )}
+
+          {/* ── Admin annotation form (when a click position is pending) ── */}
+          {user?.isAdmin && pendingPos && (
+            <div className="rounded-xl border p-4" style={{ borderColor: "#c9a22760", background: "#0e0a00" }}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-mono uppercase tracking-wider" style={{ color: "#c9a227" }}>New Hotspot</h3>
+                <button onClick={() => setPendingPos(null)} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
+              </div>
+              <div className="space-y-2 text-xs mb-3" style={{ color: "#5a7a9a" }}>
+                <p>Position: ({pendingPos.x.toFixed(2)}, {pendingPos.y.toFixed(2)}, {pendingPos.z.toFixed(2)})</p>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { key: "label", placeholder: "Label (e.g. Main Dome)", required: true },
+                  { key: "arabicTerm", placeholder: "Arabic term (optional)" },
+                  { key: "historicalPeriod", placeholder: "Historical period (optional)" },
+                ].map(({ key, placeholder, required }) => (
+                  <input
+                    key={key}
+                    placeholder={placeholder}
+                    value={annotForm[key as keyof typeof annotForm]}
+                    onChange={(e) => setAnnotForm((f) => ({ ...f, [key]: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg text-xs outline-none bg-background border border-border text-foreground placeholder:text-muted-foreground"
+                  />
+                ))}
+                <textarea
+                  placeholder="Description (required)"
+                  value={annotForm.description}
+                  onChange={(e) => setAnnotForm((f) => ({ ...f, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg text-xs outline-none bg-background border border-border text-foreground placeholder:text-muted-foreground resize-none"
+                />
+                <button
+                  onClick={saveAnnotation}
+                  disabled={annotSaving || !annotForm.label || !annotForm.description}
+                  className="w-full py-2 rounded-lg text-xs font-medium transition-opacity"
+                  style={{ background: "#c9a227", color: "#05080c", opacity: annotSaving || !annotForm.label || !annotForm.description ? 0.4 : 1 }}
+                >
+                  {annotSaving ? "Saving…" : "Save Hotspot"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── Admin: existing hotspot delete list ── */}
+          {user?.isAdmin && localHotspots.length > 0 && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">Hotspot Manager</h3>
+              <div className="space-y-1">
+                {localHotspots.map((h) => (
+                  <div key={h.id} className="flex items-center justify-between gap-2 py-1">
+                    <span className="text-xs text-foreground truncate">{h.label}</span>
+                    <button
+                      onClick={() => deleteHotspot(h.id)}
+                      className="text-muted-foreground hover:text-red-400 transition-colors flex-shrink-0"
+                      title="Delete hotspot"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Active hotspot panel */}
           {activeHotspot && (
             <div className="rounded-xl border border-secondary/40 bg-secondary/5 p-5 teal-glow">

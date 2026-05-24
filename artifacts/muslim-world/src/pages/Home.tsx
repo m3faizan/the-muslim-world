@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useListFeaturedSites, useListSitesByRegion } from "@workspace/api-client-react";
-import { ArrowRight, Map } from "lucide-react";
+import { ArrowRight, Map, User, LogOut, BookOpen } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const HERO_PHOTOS = [
   { url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1920&q=90", label: "Masjid Al-Haram · Mecca, Saudi Arabia" },
@@ -119,6 +120,7 @@ function SiteCard({ site, wide = false }: { site: any; wide?: boolean }) {
 }
 
 export default function Home() {
+  const { user, logout } = useAuth();
   const { data: featured = [], isLoading: featuredLoading } = useListFeaturedSites();
   const { data: regions = [] } = useListSitesByRegion();
   const [heroIndex, setHeroIndex] = useState(0);
@@ -160,10 +162,34 @@ export default function Home() {
             </div>
           </div>
         </Link>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <Link href="/explore">
             <span className="text-[13px] font-mono tracking-[0.08em] text-[#6b8099] hover:text-[#c9a227] transition-colors cursor-pointer uppercase">Explore Map</span>
           </Link>
+          {user ? (
+            <>
+              <Link href="/tracker">
+                <button className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-mono tracking-[0.08em] uppercase transition-all hover:text-[#c9a227]" style={{ color: "#6b8099" }}>
+                  <BookOpen className="w-3.5 h-3.5" />
+                  My Journey
+                </button>
+              </Link>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded" style={{ background: "#0c1a28", border: "1px solid #1a2a3a" }}>
+                <User className="w-3.5 h-3.5" style={{ color: "#c9a227" }} />
+                <span className="text-[12px] font-mono" style={{ color: "#d8e0ea" }}>{user.displayName}</span>
+                <button onClick={() => logout()} title="Sign out">
+                  <LogOut className="w-3.5 h-3.5 ml-1" style={{ color: "#5a7a9a" }} />
+                </button>
+              </div>
+            </>
+          ) : (
+            <Link href="/auth">
+              <button className="flex items-center gap-2 px-4 py-1.5 text-[12px] font-mono tracking-[0.08em] uppercase transition-all hover:bg-[#c9a227]/10" style={{ border: "1px solid #c9a22760", color: "#c9a227", borderRadius: "2px" }}>
+                <User className="w-3.5 h-3.5" />
+                Sign In
+              </button>
+            </Link>
+          )}
           <Link href="/explore">
             <button
               className="flex items-center gap-2 px-5 py-2 text-[12px] font-mono tracking-[0.1em] uppercase transition-all hover:bg-[#c9a227]/10"
