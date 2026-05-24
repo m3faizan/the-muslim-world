@@ -612,9 +612,10 @@ export default function SiteDetail() {
 
                 <OrbitControls
                   ref={orbitRef}
-                  enableRotate={!annotateMode && activeTool === "rotate"}
-                  enableZoom={!annotateMode && activeTool !== null}
-                  enablePan={!annotateMode && activeTool === "pan"}
+                  enabled={!annotateMode && activeTool !== null}
+                  enableRotate={activeTool === "rotate"}
+                  enableZoom={activeTool !== null}
+                  enablePan={activeTool === "pan"}
                   minDistance={0.5}
                   maxDistance={500}
                 />
