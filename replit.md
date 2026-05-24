@@ -55,6 +55,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 - The `/sites/featured` and `/sites/by-region` routes MUST be registered before `/sites/:id` in Express or the param captures them
 - react-globe.gl uses `window` — don't SSR it
 - `useGetSite` requires `queryKey` in the query options (tanstack query constraint)
+- **Sessions / cookies**: The Replit proxy terminates HTTPS but Express sees plain HTTP. `app.set("trust proxy", 1)` is required. Cookie must be `SameSite=None; Secure` (controlled by `needsSecureCookie` in `app.ts` which checks `REPLIT_DOMAINS`). Without `trust proxy`, express-session skips setting `Secure` cookies.
+- **Session table**: `connect-pg-simple`'s `createTableIfMissing: true` is unreliable — `index.ts` calls `ensureSessionTable()` at startup which runs `CREATE TABLE IF NOT EXISTS "session" ...` via the pool before the server begins listening.
+- **Admin email**: Set `ADMIN_EMAIL` env var to grant admin access (annotation editor on site detail pages). Checked at runtime via `isAdmin()` in `auth.ts`.
 
 ## Pointers
 

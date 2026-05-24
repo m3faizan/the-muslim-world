@@ -11,6 +11,11 @@ const PgSession = connectPgSimple(session);
 
 const app: Express = express();
 
+// Trust the first proxy hop (Replit's reverse proxy terminates HTTPS).
+// Required so express-session will set Secure cookies even though Express
+// itself is reached over plain HTTP internally.
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,
@@ -35,6 +40,12 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// In the Replit environment (dev or prod) the app is always served over HTTPS
+// via the shared proxy and may be embedded in an iframe (cross-site context),
+// so cookies must be SameSite=None; Secure regardless of NODE_ENV.
+const isReplitEnv = !!process.env.REPLIT_DOMAINS;
+const needsSecureCookie = process.env.NODE_ENV === "production" || isReplitEnv;
+
 app.use(
   session({
     store: new PgSession({ pool, createTableIfMissing: true }),
@@ -42,10 +53,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: needsSecureCookie,
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: needsSecureCookie ? "none" : "lax",
     },
   }),
 );

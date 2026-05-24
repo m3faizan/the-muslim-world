@@ -33,7 +33,8 @@ router.post("/auth/register", async (req, res) => {
     const [user] = await db.insert(usersTable).values({ email: email.toLowerCase(), passwordHash, displayName }).returning();
     req.session.userId = user.id;
     req.session.userEmail = user.email;
-    req.session.save(() => {
+    req.session.save((err) => {
+      if (err) req.log.error({ err }, "Session save failed on register");
       res.status(201).json({ id: user.id, email: user.email, displayName: user.displayName, isAdmin: isAdmin(user.email) });
     });
   } catch (err) {
@@ -53,7 +54,8 @@ router.post("/auth/login", async (req, res) => {
     if (!ok) { res.status(401).json({ error: "Invalid email or password" }); return; }
     req.session.userId = user.id;
     req.session.userEmail = user.email;
-    req.session.save(() => {
+    req.session.save((err) => {
+      if (err) req.log.error({ err }, "Session save failed on login");
       res.json({ id: user.id, email: user.email, displayName: user.displayName, isAdmin: isAdmin(user.email) });
     });
   } catch (err) {
