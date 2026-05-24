@@ -48,7 +48,7 @@ function MosqueMesh({
   activeHotspot,
 }: {
   hotspots: Hotspot[];
-  onHotspotClick: (h: Hotspot) => void;
+  onHotspotClick?: (h: Hotspot) => void;
   activeHotspot: Hotspot | null;
 }) {
   const gold = new THREE.MeshStandardMaterial({ color: "#d4af37", roughness: 0.3, metalness: 0.6 });
@@ -174,7 +174,7 @@ function MosqueMesh({
           position={[h.positionX, h.positionY, h.positionZ]}
           onClick={(e) => {
             e.stopPropagation();
-            onHotspotClick(h);
+            onHotspotClick?.(h);
           }}
         >
           {/* Glowing sphere */}
@@ -221,7 +221,7 @@ function GltfMesh({
 }: {
   url: string;
   hotspots: Hotspot[];
-  onHotspotClick: (h: Hotspot) => void;
+  onHotspotClick?: (h: Hotspot) => void;
   activeHotspot: Hotspot | null;
 }) {
   const { scene } = useGLTF(url);
@@ -231,7 +231,7 @@ function GltfMesh({
       {/* Hotspot markers overlaid on the GLTF model */}
       {hotspots.map((h) => (
         <group key={h.id} position={[h.positionX, h.positionY, h.positionZ]}>
-          <mesh onClick={() => onHotspotClick(h)}>
+          <mesh onClick={() => onHotspotClick?.(h)}>
             <sphereGeometry args={[0.06, 16, 16]} />
             <meshStandardMaterial
               color={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
@@ -292,8 +292,9 @@ export default function SiteDetail() {
     if (!user || !siteId) return;
     fetch("/api/auth/logs", { credentials: "include" })
       .then((r) => r.json())
-      .then((logs: any[]) => {
-        const log = logs.find((l) => l.siteId === siteId);
+      .then((data: any) => {
+        const logs = Array.isArray(data) ? data : [];
+        const log = logs.find((l: any) => l.siteId === siteId);
         setSiteLog(log ? { visited: log.visited, prayed: log.prayed } : { visited: false, prayed: false });
       });
   }, [user, siteId]);
@@ -564,12 +565,6 @@ export default function SiteDetail() {
                 shadows
                 camera={{ fov: 45 }}
                 gl={{ antialias: true }}
-                onPointerDown={(e: any) => {
-                  if (!annotateMode) return;
-                  if (e.point) {
-                    setPendingPos({ x: e.point.x, y: e.point.y, z: e.point.z });
-                  }
-                }}
               >
                 <color attach="background" args={["#0d1117"]} />
                 <ambientLight intensity={0.6} />
@@ -577,19 +572,38 @@ export default function SiteDetail() {
                 <directionalLight position={[-4, 3, -4]} intensity={0.3} color="#d4af37" />
                 <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
 
+                {/* Transparent click-catcher sphere — only active in annotation mode */}
+                {annotateMode && (
+                  <mesh
+                    renderOrder={-1}
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      if (e.point) setPendingPos({ x: e.point.x, y: e.point.y, z: e.point.z });
+                    }}
+                  >
+                    <sphereGeometry args={[80, 8, 8]} />
+                    <meshBasicMaterial
+                      transparent
+                      opacity={0}
+                      side={THREE.BackSide}
+                      depthWrite={false}
+                    />
+                  </mesh>
+                )}
+
                 <Suspense fallback={null}>
                   <Bounds fit clip observe margin={1.3}>
                     {site.modelUrl ? (
                       <GltfMesh
                         url={site.modelUrl}
                         hotspots={hotspots}
-                        onHotspotClick={setActiveHotspot}
+                        onHotspotClick={annotateMode ? undefined : setActiveHotspot}
                         activeHotspot={activeHotspot}
                       />
                     ) : (
                       <MosqueMesh
                         hotspots={hotspots}
-                        onHotspotClick={setActiveHotspot}
+                        onHotspotClick={annotateMode ? undefined : setActiveHotspot}
                         activeHotspot={activeHotspot}
                       />
                     )}
@@ -598,9 +612,9 @@ export default function SiteDetail() {
 
                 <OrbitControls
                   ref={orbitRef}
-                  enableRotate={activeTool === "rotate"}
-                  enableZoom={activeTool !== null}
-                  enablePan={activeTool === "pan"}
+                  enableRotate={!annotateMode && activeTool === "rotate"}
+                  enableZoom={!annotateMode && activeTool !== null}
+                  enablePan={!annotateMode && activeTool === "pan"}
                   minDistance={0.5}
                   maxDistance={500}
                 />
