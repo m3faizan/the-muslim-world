@@ -203,3 +203,46 @@
 .teal-glow {
   box-shadow: 0 0 20px hsl(174 60% 40% / 0.3), 0 0 60px hsl(174 60% 40% / 0.1);
 }
+
+/* ── Leaflet map overrides ─────────────────────────────────── */
+.explore-map .leaflet-container {
+  background: #0d1117;
+  font-family: inherit;
+}
+
+/* Hide default attribution branding visually but keep it accessible */
+.explore-map .leaflet-control-attribution {
+  background: rgba(13, 17, 23, 0.7) !important;
+  color: hsl(215 20% 40%) !important;
+  font-size: 10px !important;
+  border-radius: 6px 0 0 0 !important;
+}
+.explore-map .leaflet-control-attribution a {
+  color: hsl(215 20% 50%) !important;
+}
+
+/* Tooltip card */
+.explore-tooltip.leaflet-tooltip {
+  background: hsl(215 28% 10% / 0.97) !important;
+  border: 1px solid hsl(43 74% 55% / 0.25) !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+  color: hsl(210 40% 92%) !important;
+  white-space: normal !important;
+  max-width: 200px;
+}
+.explore-tooltip.leaflet-tooltip::before {
+  border-top-color: hsl(43 74% 55% / 0.25) !important;
+}
+
+/* Zoom controls */
+.explore-map .leaflet-control-zoom a {
+  background: hsl(215 28% 10% / 0.9) !important;
+  color: hsl(210 40% 70%) !important;
+  border-color: hsl(215 20% 25%) !important;
+}
+.explore-map .leaflet-control-zoom a:hover {
+  background: hsl(215 28% 16%) !important;
+  color: hsl(43 74% 55%) !important;
+}
