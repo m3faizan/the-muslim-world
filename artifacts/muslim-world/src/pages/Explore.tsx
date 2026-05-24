@@ -99,6 +99,8 @@ export default function Explore() {
             minZoom={2}
             maxZoom={16}
             zoomControl={false}
+            maxBounds={[[-85, -180], [85, 180]]}
+            maxBoundsViscosity={1.0}
             style={{ height: "100%", width: "100%", background: "#0d1117" }}
             className="explore-map"
           >
@@ -108,6 +110,7 @@ export default function Explore() {
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
               subdomains="abcd"
               maxZoom={19}
+              noWrap
             />
 
             {/* Fly to region when filter changes */}
