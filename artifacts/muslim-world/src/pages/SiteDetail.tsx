@@ -429,10 +429,10 @@ export default function SiteDetail() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full px-4 py-6 gap-6">
+      <div className="flex-1 flex flex-col lg:flex-row lg:items-start max-w-7xl mx-auto w-full px-4 py-6 gap-6">
         {/* 3D Viewer */}
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="relative rounded-2xl overflow-hidden border border-border bg-card flex-1 min-h-[480px]">
+        <div className="flex-1 flex flex-col gap-4 lg:sticky lg:top-[73px]">
+          <div className="relative rounded-2xl overflow-hidden border border-border bg-card h-[480px] lg:h-[calc(100vh-200px)]">
 
             {/* Status badge — top left */}
             <div className="absolute top-3 left-3 z-10 pointer-events-none">
@@ -659,7 +659,7 @@ export default function SiteDetail() {
         </div>
 
         {/* Info panel */}
-        <div className="lg:w-80 flex flex-col gap-4">
+        <div className="lg:w-80 flex flex-col gap-4 lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-1">
 
           {/* ── Visited / Prayed tracker ── */}
           {user ? (
