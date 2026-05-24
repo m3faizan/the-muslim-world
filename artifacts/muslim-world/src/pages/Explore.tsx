@@ -34,24 +34,7 @@ function getCategoryColor(category: string) {
   return CATEGORY_COLORS[category] ?? "#d4af37";
 }
 
-function makeMarkerIcon(color: string, featured: boolean, category: string) {
-  if (category === "mosque") {
-    const size = featured ? 40 : 32;
-    // Colorize black PNG to gold (#d4af37) via CSS filter, add glow for featured
-    const glow = featured
-      ? `drop-shadow(0 0 4px ${color}) drop-shadow(0 0 2px ${color})`
-      : `drop-shadow(0 0 2px rgba(0,0,0,0.8))`;
-    const html = `<img src="/icons/mosque-marker.png" width="${size}" height="${size}"
-      style="filter: brightness(0) saturate(100%) invert(80%) sepia(40%) saturate(600%) hue-rotate(3deg) brightness(95%) ${glow}; display:block;" />`;
-    return L.divIcon({
-      html,
-      className: "",
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size],
-      tooltipAnchor: [0, -size],
-    });
-  }
-
+function makeMarkerIcon(color: string, featured: boolean) {
   const size = featured ? 18 : 14;
   const ring = featured
     ? `<circle cx="12" cy="12" r="10" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.4"/>`
@@ -168,7 +151,7 @@ export default function Explore() {
                 <Marker
                   key={site.id}
                   position={[site.latitude, site.longitude]}
-                  icon={makeMarkerIcon(getCategoryColor(site.category), site.isFeatured, site.category)}
+                  icon={makeMarkerIcon(getCategoryColor(site.category), site.isFeatured)}
                   eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                 >
                   <Tooltip
