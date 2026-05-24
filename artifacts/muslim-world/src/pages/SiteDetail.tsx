@@ -788,6 +788,7 @@ export default function SiteDetail() {
                 { label: "Country", value: site.country },
                 { label: "Founded", value: site.yearFounded },
                 { label: "Style", value: (site as any).architecturalStyle },
+                { label: "Function", value: (site as any).dualUse },
               ]
                 .filter((d) => d.value)
                 .map((d) => (
@@ -798,6 +799,50 @@ export default function SiteDetail() {
                 ))}
             </div>
           </div>
+
+          {/* Quick facts — capacity, area, coordinates */}
+          {((site as any).capacity || (site as any).areaSqm) && (
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h3 className="font-semibold text-foreground mb-3">Quick Facts</h3>
+              <div className="space-y-2 text-sm">
+                {(site as any).capacity && (
+                  <div className="flex justify-between items-start gap-3">
+                    <span className="text-muted-foreground">Capacity</span>
+                    <span className="text-foreground text-right">
+                      ~{Number((site as any).capacity).toLocaleString()} worshippers
+                    </span>
+                  </div>
+                )}
+                {(site as any).areaSqm && (
+                  <div className="flex justify-between items-start gap-3">
+                    <span className="text-muted-foreground">Area</span>
+                    <span className="text-foreground text-right">
+                      {Number((site as any).areaSqm).toLocaleString()} m²
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-start gap-3">
+                  <span className="text-muted-foreground">Coordinates</span>
+                  <span className="text-foreground text-right font-mono text-xs">
+                    {site.latitude.toFixed(4)}°, {site.longitude.toFixed(4)}°
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Coordinates only (for sites without capacity/area data) */}
+          {!(site as any).capacity && !(site as any).areaSqm && (
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h3 className="font-semibold text-foreground mb-3">Quick Facts</h3>
+              <div className="flex justify-between items-start gap-3 text-sm">
+                <span className="text-muted-foreground">Coordinates</span>
+                <span className="text-foreground text-right font-mono text-xs">
+                  {site.latitude.toFixed(4)}°, {site.longitude.toFixed(4)}°
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Back button */}
           <Link href="/explore">

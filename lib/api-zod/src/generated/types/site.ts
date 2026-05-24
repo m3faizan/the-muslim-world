@@ -32,4 +32,19 @@ export interface Site {
      * @nullable
      */
   modelUrl?: string | null;
+  /**
+     * Approximate worshipper capacity
+     * @nullable
+     */
+  capacity?: number | null;
+  /**
+     * Total site area in square metres
+     * @nullable
+     */
+  areaSqm?: number | null;
+  /**
+     * Secondary function, e.g. "Mosque & University"
+     * @nullable
+     */
+  dualUse?: string | null;
 }

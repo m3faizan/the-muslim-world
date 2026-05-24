@@ -35,7 +35,10 @@ export const ListSitesResponseItem = zod.object({
   "significance": zod.string().describe('Brief note on Islamic historical significance'),
   "isFeatured": zod.boolean().optional(),
   "imageUrl": zod.string().nullish(),
-  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site')
+  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
+  "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
+  "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
+  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"')
 })
 export const ListSitesResponse = zod.array(ListSitesResponseItem)
 
@@ -64,6 +67,9 @@ export const GetSiteResponse = zod.object({
   "imageUrl": zod.string().nullish(),
   "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
   "architecturalStyle": zod.string().nullish(),
+  "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
+  "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
+  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"'),
   "hotspots": zod.array(zod.object({
   "id": zod.number(),
   "siteId": zod.number(),
@@ -118,7 +124,10 @@ export const ListFeaturedSitesResponseItem = zod.object({
   "significance": zod.string().describe('Brief note on Islamic historical significance'),
   "isFeatured": zod.boolean().optional(),
   "imageUrl": zod.string().nullish(),
-  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site')
+  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
+  "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
+  "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
+  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"')
 })
 export const ListFeaturedSitesResponse = zod.array(ListFeaturedSitesResponseItem)
 
@@ -143,7 +152,10 @@ export const ListSitesByRegionResponseItem = zod.object({
   "significance": zod.string().describe('Brief note on Islamic historical significance'),
   "isFeatured": zod.boolean().optional(),
   "imageUrl": zod.string().nullish(),
-  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site')
+  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
+  "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
+  "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
+  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"')
 }))
 })
 export const ListSitesByRegionResponse = zod.array(ListSitesByRegionResponseItem)

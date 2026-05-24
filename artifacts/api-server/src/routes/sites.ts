@@ -102,6 +102,9 @@ function formatSiteDetail(s: typeof sitesTable.$inferSelect) {
     ...formatSite(s),
     fullDescription: s.fullDescription,
     architecturalStyle: s.architecturalStyle ?? null,
+    capacity: s.capacity ?? null,
+    areaSqm: s.areaSqm ?? null,
+    dualUse: s.dualUse ?? null,
   };
 }
 

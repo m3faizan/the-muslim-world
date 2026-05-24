@@ -179,6 +179,15 @@ components:
         modelUrl:
           type: ["string", "null"]
           description: Path to a GLTF/GLB 3D model file for this site
+        capacity:
+          type: ["integer", "null"]
+          description: Approximate worshipper capacity
+        areaSqm:
+          type: ["integer", "null"]
+          description: Total site area in square metres
+        dualUse:
+          type: ["string", "null"]
+          description: Secondary function, e.g. "Mosque & University"
 
     Hotspot:
       type: object
@@ -253,6 +262,15 @@ components:
           description: Path to a GLTF/GLB 3D model file for this site
         architecturalStyle:
           type: ["string", "null"]
+        capacity:
+          type: ["integer", "null"]
+          description: Approximate worshipper capacity
+        areaSqm:
+          type: ["integer", "null"]
+          description: Total site area in square metres
+        dualUse:
+          type: ["string", "null"]
+          description: Secondary function, e.g. "Mosque & University"
         hotspots:
           type: array
           items:

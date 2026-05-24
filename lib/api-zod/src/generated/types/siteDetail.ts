@@ -31,5 +31,20 @@ export interface SiteDetail {
   modelUrl?: string | null;
   /** @nullable */
   architecturalStyle?: string | null;
+  /**
+     * Approximate worshipper capacity
+     * @nullable
+     */
+  capacity?: number | null;
+  /**
+     * Total site area in square metres
+     * @nullable
+     */
+  areaSqm?: number | null;
+  /**
+     * Secondary function, e.g. "Mosque & University"
+     * @nullable
+     */
+  dualUse?: string | null;
   hotspots: Hotspot[];
 }

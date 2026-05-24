@@ -1,4 +1,4 @@
-import { pgTable, serial, text, boolean, doublePrecision, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, boolean, doublePrecision, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -19,6 +19,9 @@ export const sitesTable = pgTable("sites", {
   imageUrl: text("image_url"),
   modelUrl: text("model_url"),
   architecturalStyle: text("architectural_style"),
+  capacity: integer("capacity"),
+  areaSqm: integer("area_sqm"),
+  dualUse: text("dual_use"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
