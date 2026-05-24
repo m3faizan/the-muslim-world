@@ -1,6 +1,15 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useListFeaturedSites, useListSitesByRegion } from "@workspace/api-client-react";
 import { ArrowRight, Map } from "lucide-react";
+
+const HERO_PHOTOS = [
+  { url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1920&q=90", label: "Masjid Al-Haram · Mecca, Saudi Arabia" },
+  { url: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1920&q=90", label: "Blue Mosque · Istanbul, Turkey" },
+  { url: "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=90", label: "Dome of the Rock · Jerusalem, Palestine" },
+  { url: "https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=1920&q=90", label: "Alhambra Palace · Granada, Spain" },
+  { url: "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1920&q=90", label: "Badshahi Mosque · Lahore, Pakistan" },
+];
 
 const SITE_PHOTOS: Record<string, string> = {
   "Masjid Al-Haram":    "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1200&q=85",
@@ -112,6 +121,24 @@ function SiteCard({ site, wide = false }: { site: any; wide?: boolean }) {
 export default function Home() {
   const { data: featured = [], isLoading: featuredLoading } = useListFeaturedSites();
   const { data: regions = [] } = useListSitesByRegion();
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [activeLayer, setActiveLayer] = useState<"a" | "b">("a");
+  const [photoA, setPhotoA] = useState(HERO_PHOTOS[0]);
+  const [photoB, setPhotoB] = useState(HERO_PHOTOS[1 % HERO_PHOTOS.length]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setHeroIndex((curr) => {
+        const next = (curr + 1) % HERO_PHOTOS.length;
+        setActiveLayer((layer) => {
+          if (layer === "a") { setPhotoB(HERO_PHOTOS[next]); return "b"; }
+          else { setPhotoA(HERO_PHOTOS[next]); return "a"; }
+        });
+        return next;
+      });
+    }, 6000);
+    return () => clearInterval(id);
+  }, []);
 
   const totalSites = regions.reduce((sum, r) => sum + r.count, 0);
 
@@ -150,22 +177,58 @@ export default function Home() {
       </nav>
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section
-        className="relative min-h-screen flex flex-col justify-end pb-0 pt-14"
-        style={{
-          backgroundImage: "url(https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1920&q=90)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+      <section className="relative min-h-screen flex flex-col justify-end pb-0 pt-14 overflow-hidden">
+
+        {/* Layer A */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${photoA.url})`,
+            opacity: activeLayer === "a" ? 1 : 0,
+            transition: "opacity 1.4s ease-in-out",
+            zIndex: 0,
+          }}
+        />
+        {/* Layer B */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${photoB.url})`,
+            opacity: activeLayer === "b" ? 1 : 0,
+            transition: "opacity 1.4s ease-in-out",
+            zIndex: 1,
+          }}
+        />
+
         {/* Dark overlay */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(5,8,12,0.96) 0%, rgba(5,8,12,0.7) 50%, rgba(5,8,12,0.85) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(5,8,12,0.96) 0%, rgba(5,8,12,0.65) 50%, rgba(5,8,12,0.82) 100%)", zIndex: 2 }} />
 
         {/* Islamic geometric pattern overlay */}
-        <div className="absolute inset-0 islamic-pattern-bg opacity-20 pointer-events-none" />
+        <div className="absolute inset-0 islamic-pattern-bg opacity-20 pointer-events-none" style={{ zIndex: 3 }} />
 
         {/* Vertical gold line — decorative structural element */}
-        <div className="absolute left-8 top-24 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, #c9a227, #c9a22700)" }} />
+        <div className="absolute left-8 top-24 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, #c9a227, #c9a22700)", zIndex: 4 }} />
+
+        {/* Photo credit — bottom right */}
+        <div className="absolute bottom-[88px] right-6 z-10 pointer-events-none">
+          <div className="flex items-center gap-2">
+            {HERO_PHOTOS.map((_, i) => (
+              <div
+                key={i}
+                className="transition-all duration-700"
+                style={{
+                  width: i === heroIndex ? "20px" : "4px",
+                  height: "2px",
+                  background: i === heroIndex ? "#c9a227" : "#2a3a4d",
+                  borderRadius: "1px",
+                }}
+              />
+            ))}
+            <span className="text-[10px] font-mono tracking-[0.12em] ml-2" style={{ color: "#3d5066" }}>
+              {HERO_PHOTOS[heroIndex].label}
+            </span>
+          </div>
+        </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-8 pb-20 pt-24 w-full grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-7">
