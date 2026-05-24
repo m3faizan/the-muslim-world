@@ -1,4 +1,4 @@
-import { useState, Suspense } from "react";
+import { useState, useRef, Suspense } from "react";
 import { useRoute, Link } from "wouter";
 import { useGetSite } from "@workspace/api-client-react";
 import { Canvas } from "@react-three/fiber";
@@ -13,6 +13,12 @@ import {
   X,
   Info,
   Box,
+  RotateCw,
+  ZoomIn,
+  Move,
+  RotateCcw,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { GlobeErrorBoundary } from "@/components/GlobeErrorBoundary";
 
@@ -249,6 +255,12 @@ export default function SiteDetail() {
   const siteId = Number(params?.id);
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [activeTool, setActiveTool] = useState<"rotate" | "zoom" | "pan" | null>(null);
+  const orbitRef = useRef<any>(null);
+
+  const toggleTool = (tool: "rotate" | "zoom" | "pan") => {
+    setActiveTool((prev) => (prev === tool ? null : tool));
+  };
 
   const { data: site, isLoading, error } = useGetSite(siteId, {
     query: { enabled: !!siteId, queryKey: ["getSite", siteId] },
@@ -339,22 +351,94 @@ export default function SiteDetail() {
         {/* 3D Viewer */}
         <div className="flex-1 flex flex-col gap-4">
           <div className="relative rounded-2xl overflow-hidden border border-border bg-card" style={{ height: "480px" }}>
-            {/* Instruction */}
+
+            {/* Status badge — top left */}
             <div className="absolute top-3 left-3 z-10 pointer-events-none">
               <div className="bg-background/80 border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground backdrop-blur-sm">
-                <p className="font-medium text-foreground mb-0.5">3D Model</p>
-                <p>Drag to rotate · Scroll to zoom</p>
-                <p>Click glowing dots to learn more</p>
+                <p className="font-medium text-foreground mb-0.5 flex items-center gap-1.5">
+                  {activeTool ? (
+                    <Unlock className="w-3 h-3 text-primary" />
+                  ) : (
+                    <Lock className="w-3 h-3" />
+                  )}
+                  {activeTool ? `${activeTool.charAt(0).toUpperCase() + activeTool.slice(1)} active` : "Model locked"}
+                </p>
+                <p>{activeTool ? "Use the toolbar to switch modes" : "Select a tool to interact"}</p>
               </div>
             </div>
 
+            {/* Hotspot count — top right (leave space for toolbar) */}
             {hotspots.length > 0 && (
-              <div className="absolute top-3 right-3 z-10 pointer-events-none">
+              <div className="absolute top-3 right-14 z-10 pointer-events-none">
                 <div className="bg-primary/10 border border-primary/30 rounded-full px-3 py-1 text-xs text-primary">
                   {hotspots.length} hotspot{hotspots.length !== 1 ? "s" : ""}
                 </div>
               </div>
             )}
+
+            {/* ── Side Toolbar ─────────────────────────────────── */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1 p-1.5 rounded-xl border border-border/70 bg-background/95 backdrop-blur-md shadow-lg">
+              {/* Lock / unlock indicator */}
+              <div className="w-8 h-7 flex items-center justify-center">
+                {activeTool ? (
+                  <Unlock className="w-3.5 h-3.5 text-primary" />
+                ) : (
+                  <Lock className="w-3.5 h-3.5 text-muted-foreground/50" />
+                )}
+              </div>
+
+              <div className="w-6 h-px bg-border" />
+
+              {/* Rotate */}
+              <button
+                onClick={() => toggleTool("rotate")}
+                title="Rotate model"
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+                  activeTool === "rotate"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card"
+                }`}
+              >
+                <RotateCw className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Zoom */}
+              <button
+                onClick={() => toggleTool("zoom")}
+                title="Zoom in / out"
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+                  activeTool === "zoom"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card"
+                }`}
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Pan */}
+              <button
+                onClick={() => toggleTool("pan")}
+                title="Pan / move"
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+                  activeTool === "pan"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card"
+                }`}
+              >
+                <Move className="w-3.5 h-3.5" />
+              </button>
+
+              <div className="w-6 h-px bg-border" />
+
+              {/* Reset view */}
+              <button
+                onClick={() => { orbitRef.current?.reset(); setActiveTool(null); }}
+                title="Reset view"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-card transition-all"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
             <GlobeErrorBoundary
               fallback={
@@ -396,11 +480,12 @@ export default function SiteDetail() {
                 </Suspense>
 
                 <OrbitControls
-                  enablePan={false}
+                  ref={orbitRef}
+                  enableRotate={activeTool === "rotate"}
+                  enableZoom={activeTool === "zoom"}
+                  enablePan={activeTool === "pan"}
                   minDistance={1}
                   maxDistance={100}
-                  autoRotate
-                  autoRotateSpeed={0.4}
                 />
               </Canvas>
             </GlobeErrorBoundary>
