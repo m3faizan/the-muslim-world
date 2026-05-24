@@ -14,16 +14,17 @@ const HERO_PHOTOS = [
 ];
 
 const SITE_PHOTOS: Record<string, string> = {
-  "Masjid Al-Haram":    "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1200&q=85",
-  "Masjid An-Nabawi":   "https://images.unsplash.com/photo-1592490348880-1f65e43ca4a5?auto=format&fit=crop&w=1200&q=85",
-  "Masjid Al-Aqsa":     "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1200&q=85",
-  "Dome of the Rock":   "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1200&q=85",
-  "Blue Mosque":        "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=85",
-  "Hagia Sophia":       "https://images.unsplash.com/photo-1549921296-bc94e2f8c967?auto=format&fit=crop&w=1200&q=85",
-  "Alhambra Palace":    "https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=1200&q=85",
-  "Great Mosque of Cordoba": "https://images.unsplash.com/photo-1568454537842-d933259bb258?auto=format&fit=crop&w=1200&q=85",
-  "Imam Mosque":        "https://images.unsplash.com/photo-1545167630-1c073ce95609?auto=format&fit=crop&w=1200&q=85",
-  "Badshahi Mosque":    "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1200&q=85",
+  "Masjid Al-Haram":         "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1200&q=85",
+  "Masjid An-Nabawi":        "https://images.unsplash.com/photo-1592490348880-1f65e43ca4a5?auto=format&fit=crop&w=1200&q=85",
+  "Masjid Al-Aqsa":          "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1200&q=85",
+  "Dome of the Rock":        "https://images.unsplash.com/photo-1518861704134-be18a0fa7c41?auto=format&fit=crop&w=1200&q=85",
+  "Blue Mosque":             "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=85",
+  "Hagia Sophia":            "https://images.unsplash.com/photo-1549921296-bc94e2f8c967?auto=format&fit=crop&w=1200&q=85",
+  "Alhambra Palace":         "https://images.unsplash.com/photo-1572638919949-61e3e2e0c5f4?auto=format&fit=crop&w=1200&q=85",
+  "Great Mosque of Cordoba": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=85",
+  "Imam Mosque":             "https://images.unsplash.com/photo-1545167630-1c073ce95609?auto=format&fit=crop&w=1200&q=85",
+  "Badshahi Mosque":         "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1200&q=85",
+  "Al-Azhar Mosque":         "https://images.unsplash.com/photo-1553913861-c0fddf2619ee?auto=format&fit=crop&w=1200&q=85",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -182,6 +183,12 @@ export default function Home() {
             </div>
           </div>
         </Link>
+
+        {/* ── Centre: Arabic invocation ── */}
+        <div className="absolute left-1/2 -translate-x-1/2 font-arabic text-lg tracking-wide select-none pointer-events-none" dir="rtl" style={{ color: "#39b163", opacity: 0.75 }}>
+          بسم الله الرحمن الرحيم
+        </div>
+
         <div className="flex items-center gap-4">
           <Link href="/explore">
             <span className="text-[13px] font-mono tracking-[0.08em] text-[#6b8099] hover:text-[#39b163] transition-colors cursor-pointer uppercase">Explore Map</span>
@@ -527,28 +534,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── CTA TERMINAL ────────────────────────────────────────── */}
+      {/* ── CTA ─────────────────────────────────────────────────── */}
       <section className="py-24 px-8 border-t" style={{ borderColor: "#1c2530", background: "#060a0e" }}>
         <div className="max-w-4xl mx-auto text-center">
-          <div
-            className="border p-8 mb-10 text-left font-mono text-[13px] leading-7"
-            style={{ borderColor: "#1c2530", background: "#070c10", borderRadius: "2px" }}
-          >
-            <p style={{ color: "#3d5066" }}>$ <span style={{ color: "#39b163" }}>explore</span><span style={{ color: "#6b8099" }}> --platform web --region global --sites all</span></p>
-            <p style={{ color: "#3d5066" }}>↳ Loading {totalSites || 15} heritage sites across {regions.length || 6} regions…</p>
-            <p style={{ color: "#3d5066" }}>↳ Activating interactive map with 3D model support…</p>
-            <p className="mt-1">
-              <span style={{ color: "#3bb5a0" }}>✓ Ready.</span>
-              <span className="inline-block w-2 h-4 ml-1 align-middle animate-pulse" style={{ background: "#39b163" }} />
-            </p>
-          </div>
-
           <p className="text-[11px] font-mono tracking-[0.25em] uppercase mb-4" style={{ color: "#39b163" }}>// Begin Exploration</p>
           <h2 className="text-3xl font-bold mb-4" style={{ color: "#edf2f7", letterSpacing: "-0.02em" }}>Discover the Islamic World</h2>
           <p className="text-[15px] leading-relaxed mb-8 max-w-xl mx-auto" style={{ color: "#5a7080" }}>
             Navigate an interactive map, explore 3D architectural models, and read the history of each site — from the Kaaba to the Alhambra.
           </p>
-
           <Link href="/explore">
             <button
               className="inline-flex items-center gap-3 px-8 py-4 text-[13px] font-mono tracking-[0.15em] uppercase font-bold transition-all hover:brightness-110 active:scale-[0.99]"
@@ -570,7 +563,6 @@ export default function Home() {
             </svg>
             <span className="text-[11px] font-mono tracking-[0.15em] uppercase" style={{ color: "#2a3a4d" }}>The Muslim World — Heritage Archive</span>
           </div>
-          <div className="font-arabic text-xl" dir="rtl" style={{ color: "#1c2a36" }}>بسم الله الرحمن الرحيم</div>
           <span className="text-[10px] font-mono" style={{ color: "#1e2d3d" }}>Documentation ongoing · All regions</span>
         </div>
       </footer>
