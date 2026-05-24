@@ -34,7 +34,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const HISTORY: { year: string; event: string; loc: string }[] = [
-  { year: "610 CE",  loc: "Mecca, Arabia",          event: "First Quranic revelation to Prophet Muhammad in the Cave of Hira" },
+  { year: "610 CE",  loc: "Mecca, Arabia",          event: "First Quranic revelation to Prophet Muhammad (PBUH) in the Cave of Hira" },
   { year: "622 CE",  loc: "Medina, Arabia",          event: "The Hijra — migration establishes the Islamic calendar and first Muslim state" },
   { year: "630 CE",  loc: "Mecca, Arabia",           event: "Conquest of Mecca; the Kaaba restored to monotheistic worship" },
   { year: "691 CE",  loc: "Jerusalem, Levant",       event: "Dome of the Rock completed by Caliph Abd al-Malik ibn Marwan" },
