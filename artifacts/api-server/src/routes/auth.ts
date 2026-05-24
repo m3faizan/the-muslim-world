@@ -1,6 +1,6 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
-import { db, usersTable, userSiteLogsTable } from "@workspace/db";
+import { db, usersTable, userSiteLogsTable, collectionsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
@@ -121,6 +121,48 @@ router.post("/auth/logs/:siteId", async (req, res) => {
     res.json(log);
   } catch (err) {
     req.log.error({ err }, "Log update failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/collections", async (req, res) => {
+  if (!req.session.userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+  try {
+    const rows = await db.select({ siteId: collectionsTable.siteId })
+      .from(collectionsTable)
+      .where(eq(collectionsTable.userId, req.session.userId));
+    res.json(rows.map(r => r.siteId));
+  } catch (err) {
+    req.log.error({ err }, "Collections fetch failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/collections/:siteId", async (req, res) => {
+  if (!req.session.userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+  const siteId = Number(req.params.siteId);
+  if (!Number.isFinite(siteId)) { res.status(400).json({ error: "Invalid siteId" }); return; }
+  try {
+    await db.insert(collectionsTable)
+      .values({ userId: req.session.userId, siteId })
+      .onConflictDoNothing();
+    res.json({ saved: true });
+  } catch (err) {
+    req.log.error({ err }, "Collection add failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/collections/:siteId", async (req, res) => {
+  if (!req.session.userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+  const siteId = Number(req.params.siteId);
+  if (!Number.isFinite(siteId)) { res.status(400).json({ error: "Invalid siteId" }); return; }
+  try {
+    await db.delete(collectionsTable)
+      .where(and(eq(collectionsTable.userId, req.session.userId), eq(collectionsTable.siteId, siteId)));
+    res.json({ saved: false });
+  } catch (err) {
+    req.log.error({ err }, "Collection remove failed");
     res.status(500).json({ error: "Internal server error" });
   }
 });

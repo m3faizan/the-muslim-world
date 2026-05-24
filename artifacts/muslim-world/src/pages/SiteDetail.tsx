@@ -14,6 +14,7 @@ import {
   Info,
   Box,
   RotateCcw,
+  Star,
   CheckCircle2,
   BookOpen,
   User,
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import { GlobeErrorBoundary } from "@/components/GlobeErrorBoundary";
 import { useAuth } from "@/context/AuthContext";
+import { useCollection } from "@/context/CollectionContext";
 
 type Hotspot = {
   id: number;
@@ -255,6 +257,7 @@ export default function SiteDetail() {
   const [, params] = useRoute("/site/:id");
   const siteId = Number(params?.id);
   const { user } = useAuth();
+  const { collectedIds, toggle: toggleCollection } = useCollection();
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
   const orbitRef = useRef<any>(null);
@@ -412,6 +415,22 @@ export default function SiteDetail() {
                   <Calendar className="w-4 h-4 text-primary" />
                   <span>Est. {site.yearFounded}</span>
                 </div>
+              )}
+              {user && (
+                <button
+                  onClick={() => toggleCollection(siteId)}
+                  className="flex items-center gap-1.5 sm:justify-end mt-1 transition-colors group/star"
+                  title={collectedIds.has(siteId) ? "Remove from collection" : "Save to collection"}
+                >
+                  <Star
+                    className="w-4 h-4 transition-colors"
+                    style={{ color: collectedIds.has(siteId) ? "#39b163" : undefined }}
+                    fill={collectedIds.has(siteId) ? "#39b163" : "none"}
+                  />
+                  <span className={collectedIds.has(siteId) ? "text-primary" : ""}>
+                    {collectedIds.has(siteId) ? "Saved" : "Save"}
+                  </span>
+                </button>
               )}
             </div>
           </div>

@@ -18,6 +18,14 @@ export const userSiteLogsTable = pgTable("user_site_logs", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [unique().on(t.userId, t.siteId)]);
 
+export const collectionsTable = pgTable("collections", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  siteId: integer("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
+  savedAt: timestamp("saved_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.userId, t.siteId)]);
+
 export type User = typeof usersTable.$inferSelect;
 export type InsertUser = typeof usersTable.$inferInsert;
 export type UserSiteLog = typeof userSiteLogsTable.$inferSelect;
+export type Collection = typeof collectionsTable.$inferSelect;

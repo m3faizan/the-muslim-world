@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useListFeaturedSites, useListSitesByRegion } from "@workspace/api-client-react";
-import { ArrowRight, Map, User, LogOut, BookOpen } from "lucide-react";
+import { ArrowRight, Map, User, LogOut, BookOpen, Star } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useCollection } from "@/context/CollectionContext";
 
 const HERO_PHOTOS = [
   { url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1920&q=90", label: "Masjid Al-Haram · Mecca, Saudi Arabia" },
@@ -59,6 +60,9 @@ const REGION_ARABIC: Record<string, string> = {
 function SiteCard({ site, wide = false }: { site: any; wide?: boolean }) {
   const photo = SITE_PHOTOS[site.name];
   const accentColor = CATEGORY_COLORS[site.category] ?? "#39b163";
+  const { user } = useAuth();
+  const { collectedIds, toggle } = useCollection();
+  const saved = collectedIds.has(site.id);
 
   return (
     <Link href={`/site/${site.id}`}>
@@ -97,6 +101,22 @@ function SiteCard({ site, wide = false }: { site: any; wide?: boolean }) {
         >
           {site.arabicName?.slice(0, 3)}
         </div>
+
+        {/* Star / save button */}
+        {user && (
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(site.id); }}
+            title={saved ? "Remove from collection" : "Save to collection"}
+            className="absolute bottom-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded transition-all opacity-0 group-hover:opacity-100"
+            style={{
+              background: saved ? "#39b16325" : "rgba(5,8,12,0.7)",
+              border: `1px solid ${saved ? "#39b16370" : "#2a3a4d"}`,
+              color: saved ? "#39b163" : "#5a7a9a",
+            }}
+          >
+            <Star className="w-3.5 h-3.5" fill={saved ? "#39b163" : "none"} />
+          </button>
+        )}
 
         {/* Content */}
         <div className="absolute bottom-0 left-0 right-0 p-5">
@@ -172,6 +192,12 @@ export default function Home() {
                 <button className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-mono tracking-[0.08em] uppercase transition-all hover:text-[#39b163]" style={{ color: "#6b8099" }}>
                   <BookOpen className="w-3.5 h-3.5" />
                   My Journey
+                </button>
+              </Link>
+              <Link href="/collection">
+                <button className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-mono tracking-[0.08em] uppercase transition-all hover:text-[#39b163]" style={{ color: "#6b8099" }}>
+                  <Star className="w-3.5 h-3.5" />
+                  Collection
                 </button>
               </Link>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded" style={{ background: "#0c1a28", border: "1px solid #1a2a3a" }}>
