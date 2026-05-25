@@ -7,8 +7,8 @@ import { isAdmin } from "./auth";
 const router = Router();
 
 const CreateHotspotBody = z.object({
-  label: z.string().min(1),
-  description: z.string().min(1),
+  label: z.string().optional().default(""),
+  description: z.string().optional().default(""),
   positionX: z.number(),
   positionY: z.number(),
   positionZ: z.number(),
