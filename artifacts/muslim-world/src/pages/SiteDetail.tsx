@@ -45,12 +45,14 @@ function MosqueMesh({
   activeHotspot,
   annotateMode,
   onAnnotate,
+  onClose,
 }: {
   hotspots: Hotspot[];
   onHotspotClick?: (h: Hotspot) => void;
   activeHotspot: Hotspot | null;
   annotateMode?: boolean;
   onAnnotate?: (pos: { x: number; y: number; z: number }) => void;
+  onClose?: () => void;
 }) {
   const gold = new THREE.MeshStandardMaterial({ color: "#d4af37", roughness: 0.3, metalness: 0.6 });
   const cream = new THREE.MeshStandardMaterial({ color: "#f5efe0", roughness: 0.7, metalness: 0.1 });
@@ -174,46 +176,69 @@ function MosqueMesh({
       ))}
 
       {/* Hotspot markers */}
-      {hotspots.map((h) => (
-        <group
-          key={h.id}
-          position={[h.positionX, h.positionY, h.positionZ]}
-          onClick={(e) => {
-            e.stopPropagation();
-            onHotspotClick?.(h);
-          }}
-        >
-          {/* Glowing sphere */}
-          <mesh>
-            <sphereGeometry args={[0.07, 16, 16]} />
-            <meshStandardMaterial
-              color={activeHotspot?.id === h.id ? "#40bea5" : "#d4af37"}
-              emissive={activeHotspot?.id === h.id ? "#40bea5" : "#d4af37"}
-              emissiveIntensity={activeHotspot?.id === h.id ? 1.5 : 0.8}
-              roughness={0.2}
-              metalness={0.8}
-            />
-          </mesh>
-          {/* Point light for glow */}
-          <pointLight
-            color={activeHotspot?.id === h.id ? "#40bea5" : "#d4af37"}
-            intensity={activeHotspot?.id === h.id ? 1.0 : 0.4}
-            distance={0.8}
-          />
-          {/* Label */}
-          <Html center distanceFactor={6} occlude>
-            <div
-              className={`pointer-events-none whitespace-nowrap text-xs px-2 py-1 rounded-full border backdrop-blur-sm transition-all ${
-                activeHotspot?.id === h.id
-                  ? "bg-secondary/90 border-secondary text-secondary-foreground font-medium"
-                  : "bg-card/80 border-primary/40 text-primary"
-              }`}
-            >
-              {h.label}
-            </div>
-          </Html>
-        </group>
-      ))}
+      {hotspots.map((h, i) => {
+        const isActive = activeHotspot?.id === h.id;
+        return (
+          <group key={h.id} position={[h.positionX, h.positionY, h.positionZ]}>
+            {/* Tiny invisible sphere as Three.js raycast hitbox */}
+            <mesh onClick={(e) => { e.stopPropagation(); onHotspotClick?.(h); }}>
+              <sphereGeometry args={[0.05, 8, 8]} />
+              <meshBasicMaterial transparent opacity={0} />
+            </mesh>
+
+            {/* Badge + popup via Html overlay */}
+            <Html center zIndexRange={[100, 0]} style={{ pointerEvents: "none" }}>
+              <div style={{ position: "relative", pointerEvents: "none" }}>
+                {/* Numbered circle */}
+                <div
+                  onClick={(e) => { e.stopPropagation(); onHotspotClick?.(h); }}
+                  style={{
+                    width: 22, height: 22, borderRadius: "50%",
+                    background: isActive ? "#d4af37" : "rgba(14,20,28,0.90)",
+                    color: isActive ? "#05080c" : "#ffffff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 11, fontWeight: 700,
+                    border: `2px solid ${isActive ? "#d4af37" : "rgba(212,175,55,0.75)"}`,
+                    boxShadow: isActive ? "0 0 10px rgba(212,175,55,0.55)" : "0 1px 6px rgba(0,0,0,0.6)",
+                    cursor: "pointer", pointerEvents: "auto", userSelect: "none",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {i + 1}
+                </div>
+
+                {/* Active popup */}
+                {isActive && (
+                  <div
+                    onPointerDown={(e) => e.stopPropagation()}
+                    style={{
+                      position: "absolute", left: 28, top: -8,
+                      background: "rgba(8,12,18,0.97)",
+                      border: "1px solid rgba(212,175,55,0.5)",
+                      borderRadius: 10, padding: "12px 14px",
+                      minWidth: 210, maxWidth: 270,
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
+                      pointerEvents: "auto", zIndex: 200,
+                      fontFamily: "'IBM Plex Mono', monospace",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#d4af37", color: "#05080c", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                        <span style={{ color: "#edf2f7", fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{h.label}</span>
+                      </div>
+                      <button onClick={() => onClose?.()} style={{ background: "none", border: "none", color: "#5a7080", cursor: "pointer", fontSize: 18, padding: "0 0 0 8px", lineHeight: 1, flexShrink: 0 }}>×</button>
+                    </div>
+                    {h.arabicTerm && <p dir="rtl" style={{ color: "#39b163", fontSize: 14, marginBottom: 6, textAlign: "right", fontFamily: "serif" }}>{h.arabicTerm}</p>}
+                    {h.historicalPeriod && <p style={{ color: "#5a7080", fontSize: 11, marginBottom: 6 }}>◷ {h.historicalPeriod}</p>}
+                    {h.description && <p style={{ color: "#a8c0d0", fontSize: 12, lineHeight: 1.6, margin: 0 }}>{h.description}</p>}
+                  </div>
+                )}
+              </div>
+            </Html>
+          </group>
+        );
+      })}
     </group>
   );
 }
@@ -226,6 +251,7 @@ function GltfMesh({
   activeHotspot,
   annotateMode,
   onAnnotate,
+  onClose,
 }: {
   url: string;
   hotspots: Hotspot[];
@@ -233,6 +259,7 @@ function GltfMesh({
   activeHotspot: Hotspot | null;
   annotateMode?: boolean;
   onAnnotate?: (pos: { x: number; y: number; z: number }) => void;
+  onClose?: () => void;
 }) {
   const { scene } = useGLTF(url);
   const groupRef = useRef<THREE.Group>(null);
@@ -262,36 +289,72 @@ function GltfMesh({
       >
         <primitive object={scene} />
         {/* Hotspot markers overlaid on the GLTF model */}
-        {hotspots.map((h) => (
-          <group key={h.id} position={[h.positionX, h.positionY, h.positionZ]}>
-            <mesh onClick={annotateMode ? undefined : () => onHotspotClick?.(h)}>
-              <sphereGeometry args={[hotspotRadius, 16, 16]} />
-              <meshStandardMaterial
-                color={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
-                emissive={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
-                emissiveIntensity={activeHotspot?.id === h.id ? 1.2 : 0.6}
-                roughness={0.2}
-                metalness={0.8}
-              />
-            </mesh>
-            <pointLight
-              color={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
-              intensity={activeHotspot?.id === h.id ? 1.0 : 0.4}
-              distance={hotspotRadius * 15}
-            />
-            <Html center distanceFactor={4} occlude>
-              <div
-                className={`pointer-events-none whitespace-nowrap text-xs px-2 py-1 rounded-full border backdrop-blur-sm transition-all ${
-                  activeHotspot?.id === h.id
-                    ? "bg-secondary/90 border-secondary text-secondary-foreground font-medium"
-                    : "bg-card/80 border-primary/40 text-primary"
-                }`}
-              >
-                {h.label}
-              </div>
-            </Html>
-          </group>
-        ))}
+        {hotspots.map((h, i) => {
+          const isActive = activeHotspot?.id === h.id;
+          return (
+            <group key={h.id} position={[h.positionX, h.positionY, h.positionZ]}>
+              {/* Tiny invisible sphere as Three.js raycast hitbox */}
+              {!annotateMode && (
+                <mesh onClick={(e) => { e.stopPropagation(); onHotspotClick?.(h); }}>
+                  <sphereGeometry args={[hotspotRadius * 0.6, 8, 8]} />
+                  <meshBasicMaterial transparent opacity={0} />
+                </mesh>
+              )}
+
+              {/* Badge + popup via Html overlay */}
+              <Html center zIndexRange={[100, 0]} style={{ pointerEvents: "none" }}>
+                <div style={{ position: "relative", pointerEvents: "none" }}>
+                  {/* Numbered circle */}
+                  <div
+                    onClick={annotateMode ? undefined : (e) => { e.stopPropagation(); onHotspotClick?.(h); }}
+                    style={{
+                      width: 22, height: 22, borderRadius: "50%",
+                      background: isActive ? "#d4af37" : "rgba(14,20,28,0.90)",
+                      color: isActive ? "#05080c" : "#ffffff",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 11, fontWeight: 700,
+                      border: `2px solid ${isActive ? "#d4af37" : "rgba(212,175,55,0.75)"}`,
+                      boxShadow: isActive ? "0 0 10px rgba(212,175,55,0.55)" : "0 1px 6px rgba(0,0,0,0.6)",
+                      cursor: annotateMode ? "default" : "pointer",
+                      pointerEvents: annotateMode ? "none" : "auto",
+                      userSelect: "none", transition: "all 0.15s",
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+
+                  {/* Active popup */}
+                  {isActive && (
+                    <div
+                      onPointerDown={(e) => e.stopPropagation()}
+                      style={{
+                        position: "absolute", left: 28, top: -8,
+                        background: "rgba(8,12,18,0.97)",
+                        border: "1px solid rgba(212,175,55,0.5)",
+                        borderRadius: 10, padding: "12px 14px",
+                        minWidth: 210, maxWidth: 270,
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
+                        pointerEvents: "auto", zIndex: 200,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#d4af37", color: "#05080c", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                          <span style={{ color: "#edf2f7", fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{h.label}</span>
+                        </div>
+                        <button onClick={() => onClose?.()} style={{ background: "none", border: "none", color: "#5a7080", cursor: "pointer", fontSize: 18, padding: "0 0 0 8px", lineHeight: 1, flexShrink: 0 }}>×</button>
+                      </div>
+                      {h.arabicTerm && <p dir="rtl" style={{ color: "#39b163", fontSize: 14, marginBottom: 6, textAlign: "right", fontFamily: "serif" }}>{h.arabicTerm}</p>}
+                      {h.historicalPeriod && <p style={{ color: "#5a7080", fontSize: 11, marginBottom: 6 }}>◷ {h.historicalPeriod}</p>}
+                      {h.description && <p style={{ color: "#a8c0d0", fontSize: 12, lineHeight: 1.6, margin: 0 }}>{h.description}</p>}
+                    </div>
+                  )}
+                </div>
+              </Html>
+            </group>
+          );
+        })}
       </group>
     </Center>
   );
@@ -355,7 +418,7 @@ export default function SiteDetail() {
   };
 
   const saveAnnotation = async () => {
-    if (!pendingPos || !annotForm.label || !annotForm.description) return;
+    if (!pendingPos) return;
     setAnnotSaving(true);
     const res = await fetch(`/api/sites/${siteId}/hotspots`, {
       method: "POST",
@@ -572,18 +635,20 @@ export default function SiteDetail() {
                       <GltfMesh
                         url={site.modelUrl}
                         hotspots={hotspots}
-                        onHotspotClick={annotateMode ? undefined : setActiveHotspot}
+                        onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
                         activeHotspot={activeHotspot}
                         annotateMode={annotateMode}
                         onAnnotate={(pos) => setPendingPos(pos)}
+                        onClose={() => setActiveHotspot(null)}
                       />
                     ) : (
                       <MosqueMesh
                         hotspots={hotspots}
-                        onHotspotClick={annotateMode ? undefined : setActiveHotspot}
+                        onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
                         activeHotspot={activeHotspot}
                         annotateMode={annotateMode}
                         onAnnotate={(pos) => setPendingPos(pos)}
+                        onClose={() => setActiveHotspot(null)}
                       />
                     )}
                   </Bounds>
@@ -700,10 +765,10 @@ export default function SiteDetail() {
               </div>
               <div className="space-y-2">
                 {[
-                  { key: "label", placeholder: "Label (e.g. Main Dome)", required: true },
+                  { key: "label", placeholder: "Label (e.g. Main Dome)" },
                   { key: "arabicTerm", placeholder: "Arabic term (optional)" },
                   { key: "historicalPeriod", placeholder: "Historical period (optional)" },
-                ].map(({ key, placeholder, required }) => (
+                ].map(({ key, placeholder }) => (
                   <input
                     key={key}
                     placeholder={placeholder}
@@ -713,7 +778,7 @@ export default function SiteDetail() {
                   />
                 ))}
                 <textarea
-                  placeholder="Description (required)"
+                  placeholder="Description (optional)"
                   value={annotForm.description}
                   onChange={(e) => setAnnotForm((f) => ({ ...f, description: e.target.value }))}
                   rows={3}
@@ -721,9 +786,9 @@ export default function SiteDetail() {
                 />
                 <button
                   onClick={saveAnnotation}
-                  disabled={annotSaving || !annotForm.label || !annotForm.description}
+                  disabled={annotSaving}
                   className="w-full py-2 rounded-lg text-xs font-medium transition-opacity"
-                  style={{ background: "#c9a227", color: "#05080c", opacity: annotSaving || !annotForm.label || !annotForm.description ? 0.4 : 1 }}
+                  style={{ background: "#c9a227", color: "#05080c", opacity: annotSaving ? 0.4 : 1 }}
                 >
                   {annotSaving ? "Saving…" : "Save Hotspot"}
                 </button>
@@ -752,32 +817,6 @@ export default function SiteDetail() {
             </div>
           )}
 
-          {/* Active hotspot panel */}
-          {activeHotspot && (
-            <div className="rounded-xl border border-secondary/40 bg-secondary/5 p-5 teal-glow">
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div>
-                  <h3 className="font-bold text-foreground">{activeHotspot.label}</h3>
-                  {activeHotspot.arabicTerm && (
-                    <p className="font-arabic text-sm text-secondary" dir="rtl">{activeHotspot.arabicTerm}</p>
-                  )}
-                </div>
-                <button
-                  onClick={() => setActiveHotspot(null)}
-                  className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              {activeHotspot.historicalPeriod && (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
-                  <Calendar className="w-3 h-3 text-secondary" />
-                  <span>{activeHotspot.historicalPeriod}</span>
-                </div>
-              )}
-              <p className="text-sm text-muted-foreground leading-relaxed">{activeHotspot.description}</p>
-            </div>
-          )}
 
           {/* Site description */}
           <div className="rounded-xl border border-border bg-card p-5">
