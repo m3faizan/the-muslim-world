@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect, useMemo, Suspense } from "react";
 import { useRoute, Link } from "wouter";
 import { useGetSite } from "@workspace/api-client-react";
 import { Canvas } from "@react-three/fiber";
@@ -43,10 +43,14 @@ function MosqueMesh({
   hotspots,
   onHotspotClick,
   activeHotspot,
+  annotateMode,
+  onAnnotate,
 }: {
   hotspots: Hotspot[];
   onHotspotClick?: (h: Hotspot) => void;
   activeHotspot: Hotspot | null;
+  annotateMode?: boolean;
+  onAnnotate?: (pos: { x: number; y: number; z: number }) => void;
 }) {
   const gold = new THREE.MeshStandardMaterial({ color: "#d4af37", roughness: 0.3, metalness: 0.6 });
   const cream = new THREE.MeshStandardMaterial({ color: "#f5efe0", roughness: 0.7, metalness: 0.1 });
@@ -54,7 +58,12 @@ function MosqueMesh({
   const darkStone = new THREE.MeshStandardMaterial({ color: "#8a7a62", roughness: 0.9 });
 
   return (
-    <group>
+    <group
+      onPointerDown={annotateMode ? (e: any) => {
+        e.stopPropagation();
+        if (e.point) onAnnotate?.({ x: e.point.x, y: e.point.y, z: e.point.z });
+      } : undefined}
+    >
       {/* Ground base */}
       <mesh position={[0, -0.7, 0]} receiveShadow>
         <cylinderGeometry args={[4, 4, 0.1, 64]} />
@@ -215,39 +224,75 @@ function GltfMesh({
   hotspots,
   onHotspotClick,
   activeHotspot,
+  annotateMode,
+  onAnnotate,
 }: {
   url: string;
   hotspots: Hotspot[];
   onHotspotClick?: (h: Hotspot) => void;
   activeHotspot: Hotspot | null;
+  annotateMode?: boolean;
+  onAnnotate?: (pos: { x: number; y: number; z: number }) => void;
 }) {
   const { scene } = useGLTF(url);
+  const groupRef = useRef<THREE.Group>(null);
+
+  // Derive a sphere radius proportional to the model's bounding box
+  const hotspotRadius = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    return maxDim > 0 ? maxDim * 0.018 : 0.06;
+  }, [scene]);
+
   return (
     <Center>
-      <primitive object={scene} />
-      {/* Hotspot markers overlaid on the GLTF model */}
-      {hotspots.map((h) => (
-        <group key={h.id} position={[h.positionX, h.positionY, h.positionZ]}>
-          <mesh onClick={() => onHotspotClick?.(h)}>
-            <sphereGeometry args={[0.06, 16, 16]} />
-            <meshStandardMaterial
+      <group
+        ref={groupRef}
+        onPointerDown={annotateMode ? (e: any) => {
+          e.stopPropagation();
+          if (e.point && groupRef.current) {
+            // Convert world-space hit point → group local space so the stored
+            // position matches where we render hotspot markers (also inside this group).
+            const local = groupRef.current.worldToLocal(e.point.clone());
+            onAnnotate?.({ x: local.x, y: local.y, z: local.z });
+          }
+        } : undefined}
+      >
+        <primitive object={scene} />
+        {/* Hotspot markers overlaid on the GLTF model */}
+        {hotspots.map((h) => (
+          <group key={h.id} position={[h.positionX, h.positionY, h.positionZ]}>
+            <mesh onClick={annotateMode ? undefined : () => onHotspotClick?.(h)}>
+              <sphereGeometry args={[hotspotRadius, 16, 16]} />
+              <meshStandardMaterial
+                color={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
+                emissive={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
+                emissiveIntensity={activeHotspot?.id === h.id ? 1.2 : 0.6}
+                roughness={0.2}
+                metalness={0.8}
+              />
+            </mesh>
+            <pointLight
               color={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
-              emissive={activeHotspot?.id === h.id ? "#4dd0b8" : "#d4af37"}
-              emissiveIntensity={activeHotspot?.id === h.id ? 1.2 : 0.6}
-              roughness={0.2}
-              metalness={0.8}
+              intensity={activeHotspot?.id === h.id ? 1.0 : 0.4}
+              distance={hotspotRadius * 15}
             />
-          </mesh>
-          {activeHotspot?.id === h.id && (
-            <Html center distanceFactor={4}>
-              <div className="bg-background/95 border border-secondary/50 rounded-lg px-3 py-2 text-xs text-foreground whitespace-nowrap shadow-xl pointer-events-none max-w-[180px]">
-                <p className="font-semibold text-secondary truncate">{h.label}</p>
-                {h.arabicTerm && <p className="font-arabic text-primary/60 text-right" dir="rtl">{h.arabicTerm}</p>}
+            <Html center distanceFactor={4} occlude>
+              <div
+                className={`pointer-events-none whitespace-nowrap text-xs px-2 py-1 rounded-full border backdrop-blur-sm transition-all ${
+                  activeHotspot?.id === h.id
+                    ? "bg-secondary/90 border-secondary text-secondary-foreground font-medium"
+                    : "bg-card/80 border-primary/40 text-primary"
+                }`}
+              >
+                {h.label}
               </div>
             </Html>
-          )}
-        </group>
-      ))}
+          </group>
+        ))}
+      </group>
     </Center>
   );
 }
@@ -521,25 +566,6 @@ export default function SiteDetail() {
                 <directionalLight position={[-4, 3, -4]} intensity={0.3} color="#d4af37" />
                 <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
 
-                {/* Transparent click-catcher sphere — only active in annotation mode */}
-                {annotateMode && (
-                  <mesh
-                    renderOrder={-1}
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                      if (e.point) setPendingPos({ x: e.point.x, y: e.point.y, z: e.point.z });
-                    }}
-                  >
-                    <sphereGeometry args={[80, 8, 8]} />
-                    <meshBasicMaterial
-                      transparent
-                      opacity={0}
-                      side={THREE.BackSide}
-                      depthWrite={false}
-                    />
-                  </mesh>
-                )}
-
                 <Suspense fallback={null}>
                   <Bounds fit clip observe margin={1.3}>
                     {site.modelUrl ? (
@@ -548,12 +574,16 @@ export default function SiteDetail() {
                         hotspots={hotspots}
                         onHotspotClick={annotateMode ? undefined : setActiveHotspot}
                         activeHotspot={activeHotspot}
+                        annotateMode={annotateMode}
+                        onAnnotate={(pos) => setPendingPos(pos)}
                       />
                     ) : (
                       <MosqueMesh
                         hotspots={hotspots}
                         onHotspotClick={annotateMode ? undefined : setActiveHotspot}
                         activeHotspot={activeHotspot}
+                        annotateMode={annotateMode}
+                        onAnnotate={(pos) => setPendingPos(pos)}
                       />
                     )}
                   </Bounds>
