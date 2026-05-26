@@ -33,6 +33,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   palace: "#9b7dc8",
   fortress: "#c87840",
   city: "#5a8fc4",
+  Mosque: "#39b163",
+  Shrine: "#3bb5a0",
+  Miqat: "#d4962a",
+  "Pilgrimage Site": "#c84040",
 };
 
 const HISTORY: { year: string; event: string; loc: string }[] = [
@@ -56,6 +60,7 @@ const REGION_ARABIC: Record<string, string> = {
   "North Africa":      "شمال أفريقيا",
   "Sub-Saharan Africa":"أفريقيا جنوب الصحراء",
   "Southeast Asia":    "جنوب شرق آسيا",
+  "Middle East":       "الشرق الأوسط",
 };
 
 function SiteCard({ site, wide = false }: { site: any; wide?: boolean }) {

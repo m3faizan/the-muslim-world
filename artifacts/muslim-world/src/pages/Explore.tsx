@@ -28,6 +28,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   palace: "#b478dc",
   fortress: "#dc7850",
   city: "#6ea8fe",
+  Mosque: "#d4af37",
+  Shrine: "#40bea5",
+  Miqat: "#e8a838",
+  "Pilgrimage Site": "#e05c5c",
 };
 
 function getCategoryColor(category: string) {
