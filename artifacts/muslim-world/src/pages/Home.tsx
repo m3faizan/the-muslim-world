@@ -11,12 +11,13 @@ const HERO_PHOTOS = [
   { url: "/site-images/al-azhar.jpg",  label: "Al-Azhar Mosque · Cairo, Egypt" },
   { url: "/site-images/dome-of-the-rock.jpg", label: "Dome of the Rock · Jerusalem, Palestine" },
   { url: "/site-images/masjid-an-nabawi.jpg", label: "Masjid An-Nabawi · Medina, Saudi Arabia" },
+  { url: "/site-images/masjid-an-nabawi-exterior.jpg", label: "Masjid An-Nabawi · Medina, Saudi Arabia" },
   { url: "/site-images/cordoba.jpg",   label: "Great Mosque of Córdoba · Spain" },
 ];
 
 const SITE_PHOTOS: Record<string, string> = {
   "Masjid Al-Haram":         "/site-images/masjid-al-haram.png",
-  "Masjid An-Nabawi":        "/site-images/masjid-an-nabawi.jpg",
+  "Masjid An-Nabawi":        "/site-images/masjid-an-nabawi-exterior.jpg",
   "Masjid Al-Aqsa":          "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1200&q=85",
   "Dome of the Rock":        "/site-images/dome-of-the-rock.jpg",
   "Blue Mosque":             "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=85",
@@ -347,6 +348,7 @@ export default function Home() {
               { ar: "مسجد الحرام", en: "Masjid Al-Haram", sub: "Mecca, Saudi Arabia" },
               { ar: "جامع الأزهر", en: "Al-Azhar Mosque", sub: "Cairo, Egypt" },
               { ar: "قبة الصخرة", en: "Dome of the Rock", sub: "Jerusalem, Palestine" },
+              { ar: "المسجد النبوي", en: "Masjid An-Nabawi", sub: "Medina, Saudi Arabia" },
               { ar: "المسجد النبوي", en: "Masjid An-Nabawi", sub: "Medina, Saudi Arabia" },
               { ar: "مسجد كوردوبا", en: "Great Mosque of Cordoba", sub: "Cordoba, Spain" },
             ].map((item, i) => (
