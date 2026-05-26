@@ -54,6 +54,12 @@ export interface Site {
      * @nullable
      */
   dualUse?: string | null;
+  /** Whether Eid prayer is held here */
+  eidPrayer?: boolean;
+  /** Whether this is a notable Ramadan visit destination */
+  ramadanVisit?: boolean;
+  /** Whether Jumu'ah (Friday) prayer is held here */
+  jumaPrayer?: boolean;
 }
 
 export interface Hotspot {
@@ -119,7 +125,41 @@ export interface SiteDetail {
      * @nullable
      */
   dualUse?: string | null;
+  eidPrayer?: boolean;
+  ramadanVisit?: boolean;
+  jumaPrayer?: boolean;
   hotspots: Hotspot[];
+}
+
+export interface UpdateSite {
+  name?: string;
+  arabicName?: string;
+  region?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  category?: string;
+  shortDescription?: string;
+  fullDescription?: string;
+  /** @nullable */
+  yearFounded?: string | null;
+  significance?: string;
+  isFeatured?: boolean;
+  /** @nullable */
+  imageUrl?: string | null;
+  /** @nullable */
+  modelUrl?: string | null;
+  /** @nullable */
+  architecturalStyle?: string | null;
+  /** @nullable */
+  capacity?: number | null;
+  /** @nullable */
+  areaSqm?: number | null;
+  /** @nullable */
+  dualUse?: string | null;
+  eidPrayer?: boolean;
+  ramadanVisit?: boolean;
+  jumaPrayer?: boolean;
 }
 
 export interface RegionGroup {

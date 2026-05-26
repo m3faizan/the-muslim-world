@@ -69,6 +69,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateSite
+      tags: [sites]
+      summary: Update a site (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSite"
+      responses:
+        "200":
+          description: Updated site detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteDetail"
+        "403":
+          description: Admin only
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Site not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /sites/{id}/hotspots:
     get:
@@ -188,6 +223,15 @@ components:
         dualUse:
           type: ["string", "null"]
           description: Secondary function, e.g. "Mosque & University"
+        eidPrayer:
+          type: boolean
+          description: Whether Eid prayer is held here
+        ramadanVisit:
+          type: boolean
+          description: Whether this is a notable Ramadan visit destination
+        jumaPrayer:
+          type: boolean
+          description: Whether Jumu'ah (Friday) prayer is held here
 
     Hotspot:
       type: object
@@ -271,10 +315,64 @@ components:
         dualUse:
           type: ["string", "null"]
           description: Secondary function, e.g. "Mosque & University"
+        eidPrayer:
+          type: boolean
+        ramadanVisit:
+          type: boolean
+        jumaPrayer:
+          type: boolean
         hotspots:
           type: array
           items:
             $ref: "#/components/schemas/Hotspot"
+
+    UpdateSite:
+      type: object
+      properties:
+        name:
+          type: string
+        arabicName:
+          type: string
+        region:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        category:
+          type: string
+        shortDescription:
+          type: string
+        fullDescription:
+          type: string
+        yearFounded:
+          type: ["string", "null"]
+        significance:
+          type: string
+        isFeatured:
+          type: boolean
+        imageUrl:
+          type: ["string", "null"]
+        modelUrl:
+          type: ["string", "null"]
+        architecturalStyle:
+          type: ["string", "null"]
+        capacity:
+          type: ["integer", "null"]
+        areaSqm:
+          type: ["integer", "null"]
+        dualUse:
+          type: ["string", "null"]
+        eidPrayer:
+          type: boolean
+        ramadanVisit:
+          type: boolean
+        jumaPrayer:
+          type: boolean
 
     RegionGroup:
       type: object

@@ -47,4 +47,10 @@ export interface Site {
      * @nullable
      */
   dualUse?: string | null;
+  /** Whether Eid prayer is held here */
+  eidPrayer?: boolean;
+  /** Whether this is a notable Ramadan visit destination */
+  ramadanVisit?: boolean;
+  /** Whether Jumu'ah (Friday) prayer is held here */
+  jumaPrayer?: boolean;
 }

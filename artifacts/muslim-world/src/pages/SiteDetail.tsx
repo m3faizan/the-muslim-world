@@ -20,6 +20,10 @@ import {
   User,
   Plus,
   Trash2,
+  Pencil,
+  Moon,
+  Sun,
+  Users,
 } from "lucide-react";
 import { GlobeErrorBoundary } from "@/components/GlobeErrorBoundary";
 import { useAuth } from "@/context/AuthContext";
@@ -381,13 +385,78 @@ export default function SiteDetail() {
   const [annotSaving, setAnnotSaving] = useState(false);
   const [localHotspots, setLocalHotspots] = useState<Hotspot[]>([]);
 
-  const { data: site, isLoading, error } = useGetSite(siteId, {
+  // Admin site edit
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState<Record<string, any>>({});
+  const [editSaving, setEditSaving] = useState(false);
+  const [localSite, setLocalSite] = useState<any>(null);
+
+  const { data: siteData, isLoading, error } = useGetSite(siteId, {
     query: { enabled: !!siteId, queryKey: ["getSite", siteId] },
   });
+  const site: any = localSite ?? siteData;
 
   useEffect(() => {
-    if (site) setLocalHotspots((site as any).hotspots ?? []);
-  }, [site]);
+    if (siteData) {
+      setLocalHotspots((siteData as any).hotspots ?? []);
+    }
+  }, [siteData]);
+
+  const openEdit = () => {
+    if (!site) return;
+    setEditForm({
+      name: site.name ?? "",
+      arabicName: site.arabicName ?? "",
+      region: site.region ?? "",
+      country: site.country ?? "",
+      latitude: site.latitude ?? "",
+      longitude: site.longitude ?? "",
+      category: site.category ?? "",
+      shortDescription: site.shortDescription ?? "",
+      fullDescription: site.fullDescription ?? "",
+      yearFounded: site.yearFounded ?? "",
+      significance: site.significance ?? "",
+      isFeatured: site.isFeatured ?? false,
+      architecturalStyle: site.architecturalStyle ?? "",
+      capacity: site.capacity ?? "",
+      areaSqm: site.areaSqm ?? "",
+      dualUse: site.dualUse ?? "",
+      modelUrl: site.modelUrl ?? "",
+      imageUrl: site.imageUrl ?? "",
+      eidPrayer: site.eidPrayer ?? false,
+      ramadanVisit: site.ramadanVisit ?? false,
+      jumaPrayer: site.jumaPrayer ?? false,
+    });
+    setEditOpen(true);
+  };
+
+  const saveEdit = async () => {
+    setEditSaving(true);
+    const body: Record<string, any> = { ...editForm };
+    // coerce numeric strings
+    if (body.latitude !== "") body.latitude = Number(body.latitude);
+    if (body.longitude !== "") body.longitude = Number(body.longitude);
+    if (body.capacity !== "") body.capacity = body.capacity === "" ? null : Number(body.capacity);
+    else body.capacity = null;
+    if (body.areaSqm !== "") body.areaSqm = body.areaSqm === "" ? null : Number(body.areaSqm);
+    else body.areaSqm = null;
+    // empty strings → null for nullable fields
+    ["yearFounded", "architecturalStyle", "dualUse", "modelUrl", "imageUrl"].forEach((k) => {
+      if (body[k] === "") body[k] = null;
+    });
+    const res = await fetch(`/api/sites/${siteId}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setLocalSite(updated);
+      setEditOpen(false);
+    }
+    setEditSaving(false);
+  };
 
   useEffect(() => {
     if (!user || !siteId) return;
@@ -538,6 +607,16 @@ export default function SiteDetail() {
                   <span className={collectedIds.has(siteId) ? "text-primary" : ""}>
                     {collectedIds.has(siteId) ? "Saved" : "Save"}
                   </span>
+                </button>
+              )}
+              {user?.isAdmin && (
+                <button
+                  onClick={openEdit}
+                  title="Edit site info"
+                  className="flex items-center gap-1.5 sm:justify-end mt-1 text-amber-400/70 hover:text-amber-400 transition-colors text-xs"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Edit</span>
                 </button>
               )}
             </div>
@@ -710,6 +789,30 @@ export default function SiteDetail() {
 
         {/* Info panel */}
         <div className="lg:w-80 flex flex-col gap-4 lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-1">
+
+          {/* ── Special Occasions ── */}
+          {(site.eidPrayer || site.ramadanVisit || site.jumaPrayer) && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">Special Occasions</h3>
+              <div className="flex flex-wrap gap-2">
+                {site.eidPrayer && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border" style={{ background: "#0d1a12", borderColor: "#39b16360", color: "#39b163" }}>
+                    <Sun className="w-3 h-3" /> Eid Prayer
+                  </div>
+                )}
+                {site.ramadanVisit && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border" style={{ background: "#0d1220", borderColor: "#6080e060", color: "#8090e0" }}>
+                    <Moon className="w-3 h-3" /> Ramadan Visit
+                  </div>
+                )}
+                {site.jumaPrayer && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border" style={{ background: "#1a0d0d", borderColor: "#d4af3760", color: "#d4af37" }}>
+                    <Users className="w-3 h-3" /> Jumu'ah Prayer
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* ── Visited / Prayed tracker ── */}
           {user ? (
@@ -922,6 +1025,177 @@ export default function SiteDetail() {
           </Link>
         </div>
       </div>
+
+      {/* ── Admin Edit Modal ── */}
+      {editOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto py-8 px-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-amber-500/30 bg-background shadow-2xl" style={{ background: "#060c0f" }}>
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+              <div className="flex items-center gap-2">
+                <Pencil className="w-4 h-4 text-amber-400" />
+                <h2 className="text-sm font-semibold text-foreground">Edit Site — <span className="text-amber-400">{site.name}</span></h2>
+              </div>
+              <button onClick={() => setEditOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div className="px-6 py-5 space-y-5">
+
+              {/* Section: Identity */}
+              <div>
+                <p className="text-xs font-mono uppercase tracking-wider text-amber-400/70 mb-3">Identity</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "name", label: "Name (English)" },
+                    { key: "arabicName", label: "Arabic Name" },
+                    { key: "category", label: "Category" },
+                    { key: "yearFounded", label: "Year Founded" },
+                    { key: "region", label: "Region" },
+                    { key: "country", label: "Country" },
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="text-xs text-muted-foreground block mb-1">{label}</label>
+                      <input
+                        value={editForm[key] ?? ""}
+                        onChange={(e) => setEditForm((f) => ({ ...f, [key]: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg text-xs bg-card border border-border text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section: Location */}
+              <div>
+                <p className="text-xs font-mono uppercase tracking-wider text-amber-400/70 mb-3">Location</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "latitude", label: "Latitude" },
+                    { key: "longitude", label: "Longitude" },
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="text-xs text-muted-foreground block mb-1">{label}</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={editForm[key] ?? ""}
+                        onChange={(e) => setEditForm((f) => ({ ...f, [key]: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg text-xs bg-card border border-border text-foreground outline-none focus:border-amber-500/50 transition-colors font-mono"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section: Descriptions */}
+              <div>
+                <p className="text-xs font-mono uppercase tracking-wider text-amber-400/70 mb-3">Descriptions</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">Short Description</label>
+                    <textarea
+                      rows={2}
+                      value={editForm.shortDescription ?? ""}
+                      onChange={(e) => setEditForm((f) => ({ ...f, shortDescription: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg text-xs bg-card border border-border text-foreground outline-none focus:border-amber-500/50 transition-colors resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">Full Description</label>
+                    <textarea
+                      rows={5}
+                      value={editForm.fullDescription ?? ""}
+                      onChange={(e) => setEditForm((f) => ({ ...f, fullDescription: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg text-xs bg-card border border-border text-foreground outline-none focus:border-amber-500/50 transition-colors resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">Significance</label>
+                    <textarea
+                      rows={2}
+                      value={editForm.significance ?? ""}
+                      onChange={(e) => setEditForm((f) => ({ ...f, significance: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg text-xs bg-card border border-border text-foreground outline-none focus:border-amber-500/50 transition-colors resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section: Details */}
+              <div>
+                <p className="text-xs font-mono uppercase tracking-wider text-amber-400/70 mb-3">Details</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "architecturalStyle", label: "Architectural Style" },
+                    { key: "dualUse", label: "Secondary Function" },
+                    { key: "capacity", label: "Capacity (worshippers)" },
+                    { key: "areaSqm", label: "Area (m²)" },
+                    { key: "modelUrl", label: "3D Model URL" },
+                    { key: "imageUrl", label: "Image URL" },
+                  ].map(({ key, label }) => (
+                    <div key={key} className={key === "architecturalStyle" || key === "dualUse" || key === "modelUrl" || key === "imageUrl" ? "col-span-2" : ""}>
+                      <label className="text-xs text-muted-foreground block mb-1">{label}</label>
+                      <input
+                        value={editForm[key] ?? ""}
+                        onChange={(e) => setEditForm((f) => ({ ...f, [key]: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg text-xs bg-card border border-border text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section: Flags */}
+              <div>
+                <p className="text-xs font-mono uppercase tracking-wider text-amber-400/70 mb-3">Flags &amp; Special Occasions</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "isFeatured", label: "Featured on homepage" },
+                    { key: "eidPrayer", label: "Eid Prayer held here" },
+                    { key: "ramadanVisit", label: "Notable Ramadan destination" },
+                    { key: "jumaPrayer", label: "Jumu'ah (Friday) prayer" },
+                  ].map(({ key, label }) => (
+                    <label key={key} className="flex items-center gap-2 cursor-pointer group">
+                      <div
+                        onClick={() => setEditForm((f) => ({ ...f, [key]: !f[key] }))}
+                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${
+                          editForm[key]
+                            ? "bg-amber-500/20 border-amber-500/60"
+                            : "border-border bg-card"
+                        }`}
+                      >
+                        {editForm[key] && <CheckCircle2 className="w-3 h-3 text-amber-400" />}
+                      </div>
+                      <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal footer */}
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border/50">
+              <button
+                onClick={() => setEditOpen(false)}
+                className="px-4 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground border border-border hover:border-border/80 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveEdit}
+                disabled={editSaving}
+                className="px-5 py-2 rounded-lg text-xs font-semibold transition-all"
+                style={{ background: editSaving ? "#8a6a10" : "#c9a227", color: "#05080c", opacity: editSaving ? 0.7 : 1 }}
+              >
+                {editSaving ? "Saving…" : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -38,7 +38,10 @@ export const ListSitesResponseItem = zod.object({
   "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
   "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
   "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
-  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"')
+  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"'),
+  "eidPrayer": zod.boolean().optional().describe('Whether Eid prayer is held here'),
+  "ramadanVisit": zod.boolean().optional().describe('Whether this is a notable Ramadan visit destination'),
+  "jumaPrayer": zod.boolean().optional().describe('Whether Jumu\'ah (Friday) prayer is held here')
 })
 export const ListSitesResponse = zod.array(ListSitesResponseItem)
 
@@ -70,6 +73,78 @@ export const GetSiteResponse = zod.object({
   "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
   "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
   "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"'),
+  "eidPrayer": zod.boolean().optional(),
+  "ramadanVisit": zod.boolean().optional(),
+  "jumaPrayer": zod.boolean().optional(),
+  "hotspots": zod.array(zod.object({
+  "id": zod.number(),
+  "siteId": zod.number(),
+  "label": zod.string().describe('Name of the architectural feature (e.g. Minaret, Green Dome)'),
+  "description": zod.string().describe('Detailed description shown when user clicks the hotspot'),
+  "positionX": zod.number().describe('X position on the 3D model (normalized -1 to 1)'),
+  "positionY": zod.number().describe('Y position on the 3D model (normalized -1 to 1)'),
+  "positionZ": zod.number().describe('Z position on the 3D model (normalized -1 to 1)'),
+  "arabicTerm": zod.string().nullish().describe('Arabic term for this feature'),
+  "historicalPeriod": zod.string().nullish(),
+  "imageUrl": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Update a site (admin only)
+ */
+export const UpdateSiteParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateSiteBody = zod.object({
+  "name": zod.string().optional(),
+  "arabicName": zod.string().optional(),
+  "region": zod.string().optional(),
+  "country": zod.string().optional(),
+  "latitude": zod.number().optional(),
+  "longitude": zod.number().optional(),
+  "category": zod.string().optional(),
+  "shortDescription": zod.string().optional(),
+  "fullDescription": zod.string().optional(),
+  "yearFounded": zod.string().nullish(),
+  "significance": zod.string().optional(),
+  "isFeatured": zod.boolean().optional(),
+  "imageUrl": zod.string().nullish(),
+  "modelUrl": zod.string().nullish(),
+  "architecturalStyle": zod.string().nullish(),
+  "capacity": zod.number().nullish(),
+  "areaSqm": zod.number().nullish(),
+  "dualUse": zod.string().nullish(),
+  "eidPrayer": zod.boolean().optional(),
+  "ramadanVisit": zod.boolean().optional(),
+  "jumaPrayer": zod.boolean().optional()
+})
+
+export const UpdateSiteResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "arabicName": zod.string(),
+  "region": zod.string(),
+  "country": zod.string(),
+  "latitude": zod.number(),
+  "longitude": zod.number(),
+  "category": zod.string(),
+  "shortDescription": zod.string(),
+  "fullDescription": zod.string(),
+  "yearFounded": zod.string().nullable(),
+  "significance": zod.string(),
+  "isFeatured": zod.boolean().optional(),
+  "imageUrl": zod.string().nullish(),
+  "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
+  "architecturalStyle": zod.string().nullish(),
+  "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
+  "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
+  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"'),
+  "eidPrayer": zod.boolean().optional(),
+  "ramadanVisit": zod.boolean().optional(),
+  "jumaPrayer": zod.boolean().optional(),
   "hotspots": zod.array(zod.object({
   "id": zod.number(),
   "siteId": zod.number(),
@@ -127,7 +202,10 @@ export const ListFeaturedSitesResponseItem = zod.object({
   "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
   "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
   "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
-  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"')
+  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"'),
+  "eidPrayer": zod.boolean().optional().describe('Whether Eid prayer is held here'),
+  "ramadanVisit": zod.boolean().optional().describe('Whether this is a notable Ramadan visit destination'),
+  "jumaPrayer": zod.boolean().optional().describe('Whether Jumu\'ah (Friday) prayer is held here')
 })
 export const ListFeaturedSitesResponse = zod.array(ListFeaturedSitesResponseItem)
 
@@ -155,7 +233,10 @@ export const ListSitesByRegionResponseItem = zod.object({
   "modelUrl": zod.string().nullish().describe('Path to a GLTF\/GLB 3D model file for this site'),
   "capacity": zod.number().nullish().describe('Approximate worshipper capacity'),
   "areaSqm": zod.number().nullish().describe('Total site area in square metres'),
-  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"')
+  "dualUse": zod.string().nullish().describe('Secondary function, e.g. \"Mosque & University\"'),
+  "eidPrayer": zod.boolean().optional().describe('Whether Eid prayer is held here'),
+  "ramadanVisit": zod.boolean().optional().describe('Whether this is a notable Ramadan visit destination'),
+  "jumaPrayer": zod.boolean().optional().describe('Whether Jumu\'ah (Friday) prayer is held here')
 }))
 })
 export const ListSitesByRegionResponse = zod.array(ListSitesByRegionResponseItem)

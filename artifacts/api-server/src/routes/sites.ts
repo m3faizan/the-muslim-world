@@ -1,10 +1,44 @@
-import { Router } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import { db, sitesTable, hotspotsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
+import { z } from "zod";
+import { isAdmin } from "./auth";
 import {
   GetSiteParams,
   ListHotspotsParams,
 } from "@workspace/api-zod";
+
+function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+  if (!req.session?.userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+  if (!req.session?.userEmail || !isAdmin(req.session.userEmail)) {
+    res.status(403).json({ error: "Admin only" }); return;
+  }
+  next();
+}
+
+const UpdateSiteBody = z.object({
+  name: z.string().optional(),
+  arabicName: z.string().optional(),
+  region: z.string().optional(),
+  country: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  category: z.string().optional(),
+  shortDescription: z.string().optional(),
+  fullDescription: z.string().optional(),
+  yearFounded: z.string().nullable().optional(),
+  significance: z.string().optional(),
+  isFeatured: z.boolean().optional(),
+  imageUrl: z.string().nullable().optional(),
+  modelUrl: z.string().nullable().optional(),
+  architecturalStyle: z.string().nullable().optional(),
+  capacity: z.number().int().nullable().optional(),
+  areaSqm: z.number().int().nullable().optional(),
+  dualUse: z.string().nullable().optional(),
+  eidPrayer: z.boolean().optional(),
+  ramadanVisit: z.boolean().optional(),
+  jumaPrayer: z.boolean().optional(),
+});
 
 const router = Router();
 
@@ -67,6 +101,24 @@ router.get("/sites/:id", async (req, res) => {
   }
 });
 
+router.patch("/sites/:id", requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) { res.status(400).json({ error: "Invalid site id" }); return; }
+  const parsed = UpdateSiteBody.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
+  try {
+    const [existing] = await db.select().from(sitesTable).where(eq(sitesTable.id, id));
+    if (!existing) { res.status(404).json({ error: "Site not found" }); return; }
+    await db.update(sitesTable).set(parsed.data).where(eq(sitesTable.id, id));
+    const [updated] = await db.select().from(sitesTable).where(eq(sitesTable.id, id));
+    const hotspots = await db.select().from(hotspotsTable).where(eq(hotspotsTable.siteId, id));
+    res.json({ ...formatSiteDetail(updated), hotspots: hotspots.map(formatHotspot) });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update site");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.get("/sites/:id/hotspots", async (req, res) => {
   try {
     const { id } = ListHotspotsParams.parse({ id: Number(req.params.id) });
@@ -94,6 +146,9 @@ function formatSite(s: typeof sitesTable.$inferSelect) {
     isFeatured: s.isFeatured,
     imageUrl: s.imageUrl ?? null,
     modelUrl: s.modelUrl ?? null,
+    eidPrayer: s.eidPrayer,
+    ramadanVisit: s.ramadanVisit,
+    jumaPrayer: s.jumaPrayer,
   };
 }
 

@@ -46,5 +46,8 @@ export interface SiteDetail {
      * @nullable
      */
   dualUse?: string | null;
+  eidPrayer?: boolean;
+  ramadanVisit?: boolean;
+  jumaPrayer?: boolean;
   hotspots: Hotspot[];
 }

@@ -6,11 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -21,11 +25,12 @@ import type {
   Hotspot,
   RegionGroup,
   Site,
-  SiteDetail
+  SiteDetail,
+  UpdateSite
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
-import type { ErrorType } from '../custom-fetch';
+import type { ErrorType , BodyType } from '../custom-fetch';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -268,6 +273,78 @@ export function useGetSite<TData = Awaited<ReturnType<typeof getSite>>, TError =
 
 
 
+
+export const getUpdateSiteUrl = (id: number,) => {
+
+
+
+
+  return `/api/sites/${id}`
+}
+
+/**
+ * @summary Update a site (admin only)
+ */
+export const updateSite = async (id: number,
+    updateSite: UpdateSite, options?: RequestInit): Promise<SiteDetail> => {
+
+  return customFetch<SiteDetail>(getUpdateSiteUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateSite,)
+  }
+);}
+
+
+
+
+export const getUpdateSiteMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSite>>, TError,{id: number;data: BodyType<UpdateSite>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSite>>, TError,{id: number;data: BodyType<UpdateSite>}, TContext> => {
+
+const mutationKey = ['updateSite'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSite>>, {id: number;data: BodyType<UpdateSite>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateSite(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSiteMutationResult = NonNullable<Awaited<ReturnType<typeof updateSite>>>
+    export type UpdateSiteMutationBody = BodyType<UpdateSite>
+    export type UpdateSiteMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Update a site (admin only)
+ */
+export const useUpdateSite = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSite>>, TError,{id: number;data: BodyType<UpdateSite>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateSite>>,
+        TError,
+        {id: number;data: BodyType<UpdateSite>},
+        TContext
+      > => {
+      return useMutation(getUpdateSiteMutationOptions(options));
+    }
 
 export const getListHotspotsUrl = (id: number,) => {
 

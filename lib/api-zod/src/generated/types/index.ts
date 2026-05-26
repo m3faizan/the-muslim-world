@@ -12,3 +12,4 @@ export * from './hotspot';
 export * from './regionGroup';
 export * from './site';
 export * from './siteDetail';
+export * from './updateSite';

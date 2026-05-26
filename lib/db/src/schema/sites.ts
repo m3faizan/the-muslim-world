@@ -22,6 +22,9 @@ export const sitesTable = pgTable("sites", {
   capacity: integer("capacity"),
   areaSqm: integer("area_sqm"),
   dualUse: text("dual_use"),
+  eidPrayer: boolean("eid_prayer").notNull().default(false),
+  ramadanVisit: boolean("ramadan_visit").notNull().default(false),
+  jumaPrayer: boolean("juma_prayer").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
