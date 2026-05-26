@@ -74,7 +74,7 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
         color:#ffffff;
         font-size:11px;
         font-weight:700;
-        font-family:sans-serif;
+        font-family:'IBM Plex Mono',monospace;
         text-shadow:0 1px 4px rgba(0,0,0,0.9),0 0 8px rgba(0,0,0,0.8);
         pointer-events:none;
       ">${label}</div>`
