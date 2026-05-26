@@ -8,7 +8,7 @@ import { useCollection } from "@/context/CollectionContext";
 const HERO_PHOTOS = [
   { url: "/site-images/hero-calligraphy.png", label: "Islamic Calligraphy · The Written Word of the Faith" },
   { url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1920&q=90", label: "Masjid Al-Haram · Mecca, Saudi Arabia" },
-  { url: "/site-images/al-azhar.png",  label: "Al-Azhar Mosque · Cairo, Egypt" },
+  { url: "/site-images/al-azhar.jpg",  label: "Al-Azhar Mosque · Cairo, Egypt" },
   { url: "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=90", label: "Dome of the Rock · Jerusalem, Palestine" },
   { url: "/site-images/alhambra.png",  label: "Alhambra Palace · Granada, Spain" },
   { url: "/site-images/cordoba.png",   label: "Great Mosque of Córdoba · Spain" },
@@ -26,7 +26,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Great Mosque of Cordoba": "/site-images/cordoba.png",
   "Imam Mosque":             "https://images.unsplash.com/photo-1545167630-1c073ce95609?auto=format&fit=crop&w=1200&q=85",
   "Badshahi Mosque":         "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1200&q=85",
-  "Al-Azhar Mosque":         "/site-images/al-azhar.png",
+  "Al-Azhar Mosque":         "/site-images/al-azhar.jpg",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
