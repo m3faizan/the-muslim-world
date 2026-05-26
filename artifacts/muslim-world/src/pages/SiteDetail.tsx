@@ -247,6 +247,31 @@ function MosqueMesh({
   );
 }
 
+
+// ─── USDZ fallback (AR Quick Look for iOS) ───────────────────────────────────────────
+function UsdzFallback({ src, name }: { src: string; name: string }) {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center gap-4 text-center" style={{ background: "#0d1117" }}>
+      <Box className="w-16 h-16 text-[#39b163]/40" />
+      <p className="text-sm text-[#d8e0ea] max-w-xs">
+        USDZ 3D model available.
+      </p>
+      <a
+        href={src}
+        rel="ar"
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-mono tracking-wide uppercase border transition-all hover:bg-[#39b163]/10 hover:border-[#39b163]/50"
+        style={{ color: "#39b163", borderColor: "#39b16340", borderRadius: "2px" }}
+      >
+        <Box className="w-4 h-4" />
+        View in AR (iOS)
+      </a>
+      <p className="text-[10px] text-[#3d5066] max-w-xs">
+        Tap to open the 3D model in Apple AR Quick Look on iPhone or iPad.
+      </p>
+    </div>
+  );
+}
+
 // ─── GLTF Model loader ──────────────────────────────────────────────────────────
 function GltfMesh({
   url,
@@ -687,64 +712,69 @@ export default function SiteDetail() {
               </div>
             )}
 
-            <GlobeErrorBoundary
-              fallback={
-                <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-center bg-card">
-                  <Box className="w-12 h-12 text-primary/30" />
-                  <p className="text-foreground font-medium">3D view unavailable</p>
-                  <p className="text-muted-foreground text-sm max-w-xs">
-                    Your browser does not support WebGL. Explore the site details in the panel on the right.
-                  </p>
-                </div>
-              }
-            >
-              <Canvas
-                shadows
-                camera={{ fov: 45 }}
-                gl={{ antialias: true }}
+            {/* 3D Viewer — USDZ AR link for iOS, R3F Canvas for GLB */}
+            {site.modelUrl && site.modelUrl.endsWith(".usdz") ? (
+              <UsdzFallback src={site.modelUrl} name={site.name} />
+            ) : (
+              <GlobeErrorBoundary
+                fallback={
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-center bg-card">
+                    <Box className="w-12 h-12 text-primary/30" />
+                    <p className="text-foreground font-medium">3D view unavailable</p>
+                    <p className="text-muted-foreground text-sm max-w-xs">
+                      Your browser does not support WebGL. Explore the site details in the panel on the right.
+                    </p>
+                  </div>
+                }
               >
-                <color attach="background" args={["#0d1117"]} />
-                <ambientLight intensity={0.6} />
-                <directionalLight position={[5, 8, 5]} intensity={1.2} castShadow />
-                <directionalLight position={[-4, 3, -4]} intensity={0.3} color="#d4af37" />
-                <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
+                <Canvas
+                  shadows
+                  camera={{ fov: 45 }}
+                  gl={{ antialias: true }}
+                >
+                  <color attach="background" args={["#0d1117"]} />
+                  <ambientLight intensity={0.6} />
+                  <directionalLight position={[5, 8, 5]} intensity={1.2} castShadow />
+                  <directionalLight position={[-4, 3, -4]} intensity={0.3} color="#d4af37" />
+                  <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
 
-                <Suspense fallback={null}>
-                  <Bounds fit clip observe margin={1.3}>
-                    {site.modelUrl ? (
-                      <GltfMesh
-                        url={site.modelUrl}
-                        hotspots={hotspots}
-                        onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
-                        activeHotspot={activeHotspot}
-                        annotateMode={annotateMode}
-                        onAnnotate={(pos) => setPendingPos(pos)}
-                        onClose={() => setActiveHotspot(null)}
-                      />
-                    ) : (
-                      <MosqueMesh
-                        hotspots={hotspots}
-                        onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
-                        activeHotspot={activeHotspot}
-                        annotateMode={annotateMode}
-                        onAnnotate={(pos) => setPendingPos(pos)}
-                        onClose={() => setActiveHotspot(null)}
-                      />
-                    )}
-                  </Bounds>
-                </Suspense>
+                  <Suspense fallback={null}>
+                    <Bounds fit clip observe margin={1.3}>
+                      {site.modelUrl ? (
+                        <GltfMesh
+                          url={site.modelUrl}
+                          hotspots={hotspots}
+                          onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                          activeHotspot={activeHotspot}
+                          annotateMode={annotateMode}
+                          onAnnotate={(pos) => setPendingPos(pos)}
+                          onClose={() => setActiveHotspot(null)}
+                        />
+                      ) : (
+                        <MosqueMesh
+                          hotspots={hotspots}
+                          onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                          activeHotspot={activeHotspot}
+                          annotateMode={annotateMode}
+                          onAnnotate={(pos) => setPendingPos(pos)}
+                          onClose={() => setActiveHotspot(null)}
+                        />
+                      )}
+                    </Bounds>
+                  </Suspense>
 
-                <OrbitControls
-                  ref={orbitRef}
-                  enabled={!annotateMode}
-                  enableRotate={!annotateMode}
-                  enableZoom={!annotateMode}
-                  enablePan={!annotateMode}
-                  minDistance={0.5}
-                  maxDistance={500}
-                />
-              </Canvas>
-            </GlobeErrorBoundary>
+                  <OrbitControls
+                    ref={orbitRef}
+                    enabled={!annotateMode}
+                    enableRotate={!annotateMode}
+                    enableZoom={!annotateMode}
+                    enablePan={!annotateMode}
+                    minDistance={0.5}
+                    maxDistance={500}
+                  />
+                </Canvas>
+              </GlobeErrorBoundary>
+            )}
           </div>
 
           {/* Model accuracy disclaimer */}
