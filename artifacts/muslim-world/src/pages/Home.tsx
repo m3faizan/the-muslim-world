@@ -32,6 +32,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Afsonalar Vodiysi Mosque": "/site-images/afsonalar-vodiysi.jpg",
   "Kudhu Miskiyy": "/site-images/kudhu-miskiyy.jpg",
   "Ban Tok Chao Mosque": "/site-images/ban-tok-chao.jpg",
+  "Al Mohamadi Mosque": "/site-images/al-mohamadi-mosque.jpg",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
