@@ -21,7 +21,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Masjid Al-Aqsa":          "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1200&q=85",
   "Dome of the Rock":        "https://images.unsplash.com/photo-1518861704134-be18a0fa7c41?auto=format&fit=crop&w=1200&q=85",
   "Blue Mosque":             "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=85",
-  "Hagia Sophia":            "https://images.unsplash.com/photo-1549921296-bc94e2f8c967?auto=format&fit=crop&w=1200&q=85",
+  "Hagia Sophia":            "/site-images/hagia-sophia.jpg",
   "Alhambra Palace":         "/site-images/alhambra.jpg",
   "Great Mosque of Cordoba": "/site-images/cordoba.jpg",
   "Imam Mosque":             "https://images.unsplash.com/photo-1545167630-1c073ce95609?auto=format&fit=crop&w=1200&q=85",
