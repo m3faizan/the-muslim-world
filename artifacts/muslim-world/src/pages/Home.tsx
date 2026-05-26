@@ -7,7 +7,7 @@ import { useCollection } from "@/context/CollectionContext";
 
 const HERO_PHOTOS = [
   { url: "/site-images/hero-calligraphy.png", label: "Islamic Calligraphy · The Written Word of the Faith" },
-  { url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1920&q=90", label: "Masjid Al-Haram · Mecca, Saudi Arabia" },
+  { url: "/site-images/masjid-al-haram.png", label: "Masjid Al-Haram · Mecca, Saudi Arabia" },
   { url: "/site-images/al-azhar.jpg",  label: "Al-Azhar Mosque · Cairo, Egypt" },
   { url: "/site-images/dome-of-the-rock.jpg", label: "Dome of the Rock · Jerusalem, Palestine" },
   { url: "/site-images/alhambra.jpg",  label: "Alhambra Palace · Granada, Spain" },
@@ -16,8 +16,8 @@ const HERO_PHOTOS = [
 ];
 
 const SITE_PHOTOS: Record<string, string> = {
-  "Masjid Al-Haram":         "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1200&q=85",
-  "Masjid An-Nabawi":        "https://images.unsplash.com/photo-1592490348880-1f65e43ca4a5?auto=format&fit=crop&w=1200&q=85",
+  "Masjid Al-Haram":         "/site-images/masjid-al-haram.png",
+  "Masjid An-Nabawi":        "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1200&q=85",
   "Masjid Al-Aqsa":          "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1200&q=85",
   "Dome of the Rock":        "/site-images/dome-of-the-rock.jpg",
   "Blue Mosque":             "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=85",
@@ -438,14 +438,19 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Two wide cards: Masjid Al-Haram & Masjid An-Nabawi */}
-            {featured
-              .filter((s) => ["Masjid Al-Haram", "Masjid An-Nabawi"].includes(s.name))
-              .map((site) => (
-                <div key={site.id} className="lg:col-span-2">
-                  <SiteCard site={site} wide />
-                </div>
-              ))}
+            {/* Custom row: Masjid Al-Haram (55%) + Masjid An-Nabawi (45%) */}
+            <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-4">
+              {featured
+                .filter((s) => s.name === "Masjid Al-Haram")
+                .map((site) => (
+                  <SiteCard key={site.id} site={site} wide />
+                ))}
+              {featured
+                .filter((s) => s.name === "Masjid An-Nabawi")
+                .map((site) => (
+                  <SiteCard key={site.id} site={site} wide />
+                ))}
+            </div>
             {/* Four normal cards */}
             {featured
               .filter((s) =>
