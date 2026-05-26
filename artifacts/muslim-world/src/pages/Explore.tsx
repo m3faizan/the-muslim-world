@@ -32,7 +32,7 @@ const CATEGORIES = [
   { label: "Mosque",          icon: mosqueIconUrl,      color: "#d4af37" },
   { label: "Shrine",          icon: shrineIconUrl,      color: "#40bea5" },
   { label: "Palace",          icon: palaceIconUrl,      color: "#b478dc" },
-  { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#e05c5c" },
+  { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#000000" },
   { label: "Others",          icon: othersIconUrl,      color: "#6ea8fe" },
 ] as const;
 
