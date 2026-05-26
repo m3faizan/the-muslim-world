@@ -58,7 +58,7 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean) {
   const key = `${iconUrl}-${color}-${featured}`;
   if (iconCache[key]) return iconCache[key];
 
-  const size = featured ? 28 : 22;
+  const size = 22;
   const imgPad = Math.round(size * 0.22);
   const imgSize = size - imgPad * 2;
 
