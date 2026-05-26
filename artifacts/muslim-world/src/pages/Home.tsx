@@ -12,7 +12,6 @@ const HERO_PHOTOS = [
   { url: "/site-images/dome-of-the-rock.jpg", label: "Dome of the Rock · Jerusalem, Palestine" },
   { url: "/site-images/masjid-an-nabawi.jpg", label: "Masjid An-Nabawi · Medina, Saudi Arabia" },
   { url: "/site-images/cordoba.jpg",   label: "Great Mosque of Córdoba · Spain" },
-  { url: "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1920&q=90", label: "Badshahi Mosque · Lahore, Pakistan" },
 ];
 
 const SITE_PHOTOS: Record<string, string> = {
@@ -341,14 +340,14 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right column — mosque names synced with hero */}
+          {/* Right column — names synced with hero carousel */}
           <div className="hidden lg:flex col-span-5 flex-col items-end justify-center gap-6 text-right">
             {[
+              { ar: "بسم الله", en: "Islamic Calligraphy", sub: "The Written Word of the Faith" },
               { ar: "مسجد الحرام", en: "Masjid Al-Haram", sub: "Mecca, Saudi Arabia" },
-              { ar: "المسجد الأقصى", en: "Masjid Al-Aqsa", sub: "Jerusalem, Palestine" },
+              { ar: "جامع الأزهر", en: "Al-Azhar Mosque", sub: "Cairo, Egypt" },
               { ar: "قبة الصخرة", en: "Dome of the Rock", sub: "Jerusalem, Palestine" },
               { ar: "المسجد النبوي", en: "Masjid An-Nabawi", sub: "Medina, Saudi Arabia" },
-              { ar: "جامع الأزهر", en: "Al-Azhar Mosque", sub: "Cairo, Egypt" },
               { ar: "مسجد كوردوبا", en: "Great Mosque of Cordoba", sub: "Cordoba, Spain" },
             ].map((item, i) => (
               <div
