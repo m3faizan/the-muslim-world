@@ -27,6 +27,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Imam Mosque":             "https://images.unsplash.com/photo-1545167630-1c073ce95609?auto=format&fit=crop&w=1200&q=85",
   "Badshahi Mosque":         "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1200&q=85",
   "Al-Azhar Mosque":         "/site-images/al-azhar.jpg",
+  "Sultan Salahuddin Abdul Aziz Shah Mosque": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
