@@ -31,6 +31,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Great Mosque of Tirana": "",
   "Afsonalar Vodiysi Mosque": "/site-images/afsonalar-vodiysi.jpg",
   "Kudhu Miskiyy": "/site-images/kudhu-miskiyy.jpg",
+  "Ban Tok Chao Mosque": "/site-images/ban-tok-chao.jpg",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
