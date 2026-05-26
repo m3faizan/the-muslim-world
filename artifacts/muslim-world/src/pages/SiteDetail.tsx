@@ -815,29 +815,6 @@ export default function SiteDetail() {
             </div>
           )}
 
-          {/* ── Islamic Tradition ── */}
-          {(site as any).sect && (() => {
-            const SECT_META: Record<string, { color: string; bg: string; border: string; desc: string }> = {
-              "Universal":  { color: "#d4af37", bg: "#1a1400", border: "#d4af3760", desc: "Revered by all Muslims worldwide" },
-              "Sunni":      { color: "#39b163", bg: "#001a0a", border: "#39b16360", desc: "Significant in Sunni Islamic tradition" },
-              "Shia":       { color: "#6080e0", bg: "#0a0d1a", border: "#6080e060", desc: "Significant in Shia Islamic tradition" },
-              "Sufi":       { color: "#b478dc", bg: "#12001a", border: "#b478dc60", desc: "Associated with Sufi/mystical tradition" },
-              "Ibadi":      { color: "#40bea5", bg: "#001a16", border: "#40bea560", desc: "Associated with Ibadi Islamic tradition" },
-            };
-            const meta = SECT_META[(site as any).sect] ?? { color: "#8090a0", bg: "#0d1117", border: "#8090a060", desc: "Islamic heritage site" };
-            return (
-              <div className="rounded-xl border p-4" style={{ background: meta.bg, borderColor: meta.border }}>
-                <h3 className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: meta.color + "cc" }}>Islamic Tradition</h3>
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: meta.color }} />
-                  <div>
-                    <p className="text-sm font-semibold" style={{ color: meta.color }}>{(site as any).sect}</p>
-                    <p className="text-xs mt-0.5" style={{ color: meta.color + "99" }}>{meta.desc}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
 
           {/* ── Visited / Prayed tracker ── */}
           {user ? (
@@ -984,6 +961,7 @@ export default function SiteDetail() {
                 { label: "Region", value: site.region },
                 { label: "Country", value: site.country },
                 { label: "Founded", value: site.yearFounded },
+                { label: "Tradition", value: (site as any).sect },
                 { label: "Style", value: (site as any).architecturalStyle },
                 { label: "Function", value: (site as any).dualUse },
               ]
