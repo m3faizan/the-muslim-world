@@ -81,11 +81,11 @@ function SiteCard({ site, wide = false }: { site: any; wide?: boolean }) {
         {/* Photo or pattern fallback */}
         {photo ? (
           <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+            className="absolute inset-0 bg-cover bg-center transition-all duration-500 group-hover:scale-105 group-hover:brightness-75"
             style={{ backgroundImage: `url(${photo})` }}
           />
         ) : (
-          <div className="absolute inset-0 islamic-pattern-bg" style={{ background: "#0a0f14" }} />
+          <div className="absolute inset-0 islamic-pattern-bg transition-all duration-500 group-hover:brightness-75" style={{ background: "#0a0f14" }} />
         )}
 
         {/* Dark gradient overlay */}
@@ -438,19 +438,22 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* First item is wide */}
-            {featured.slice(0, 1).map((site) => (
-              <div key={site.id} className="lg:col-span-2">
-                <SiteCard site={site} wide />
-              </div>
-            ))}
-            {/* Next items normal */}
-            {featured.slice(1, 3).map((site) => (
-              <SiteCard key={site.id} site={site} />
-            ))}
-            {featured.slice(3, 6).map((site) => (
-              <SiteCard key={site.id} site={site} />
-            ))}
+            {/* Two wide cards: Masjid Al-Haram & Masjid An-Nabawi */}
+            {featured
+              .filter((s) => ["Masjid Al-Haram", "Masjid An-Nabawi"].includes(s.name))
+              .map((site) => (
+                <div key={site.id} className="lg:col-span-2">
+                  <SiteCard site={site} wide />
+                </div>
+              ))}
+            {/* Four normal cards */}
+            {featured
+              .filter((s) =>
+                ["Dome of the Rock", "Al-Azhar Mosque", "Alhambra Palace", "Great Mosque of Cordoba"].includes(s.name)
+              )
+              .map((site) => (
+                <SiteCard key={site.id} site={site} />
+              ))}
           </div>
         )}
       </section>
