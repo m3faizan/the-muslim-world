@@ -10,14 +10,14 @@ const HERO_PHOTOS = [
   { url: "/site-images/masjid-al-haram.png", label: "Masjid Al-Haram · Mecca, Saudi Arabia" },
   { url: "/site-images/al-azhar.jpg",  label: "Al-Azhar Mosque · Cairo, Egypt" },
   { url: "/site-images/dome-of-the-rock.jpg", label: "Dome of the Rock · Jerusalem, Palestine" },
-  { url: "/site-images/alhambra.jpg",  label: "Alhambra Palace · Granada, Spain" },
+  { url: "/site-images/masjid-an-nabawi.jpg", label: "Masjid An-Nabawi · Medina, Saudi Arabia" },
   { url: "/site-images/cordoba.jpg",   label: "Great Mosque of Córdoba · Spain" },
   { url: "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1920&q=90", label: "Badshahi Mosque · Lahore, Pakistan" },
 ];
 
 const SITE_PHOTOS: Record<string, string> = {
   "Masjid Al-Haram":         "/site-images/masjid-al-haram.png",
-  "Masjid An-Nabawi":        "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1200&q=85",
+  "Masjid An-Nabawi":        "/site-images/masjid-an-nabawi.jpg",
   "Masjid Al-Aqsa":          "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1200&q=85",
   "Dome of the Rock":        "/site-images/dome-of-the-rock.jpg",
   "Blue Mosque":             "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=85",
@@ -357,7 +357,7 @@ export default function Home() {
               { ar: "مسجد الحرام", en: "Masjid Al-Haram", sub: "Mecca, Saudi Arabia" },
               { ar: "المسجد الأقصى", en: "Masjid Al-Aqsa", sub: "Jerusalem, Palestine" },
               { ar: "قبة الصخرة", en: "Dome of the Rock", sub: "Jerusalem, Palestine" },
-              { ar: "الحمراء", en: "Alhambra Palace", sub: "Granada, Spain" },
+              { ar: "المسجد النبوي", en: "Masjid An-Nabawi", sub: "Medina, Saudi Arabia" },
             ].map((item, i) => (
               <div
                 key={i}
