@@ -29,12 +29,12 @@ type Site = {
 };
 
 const CATEGORIES = [
-  { label: "Mosque",          icon: mosqueIconUrl,      color: "#d4af37" },
-  { label: "Shrine",          icon: shrineIconUrl,      color: "#40bea5" },
-  { label: "Palace",          icon: palaceIconUrl,      color: "#b478dc" },
-  { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#000000" },
-  { label: "Others",          icon: othersIconUrl,      color: "#6ea8fe" },
-] as const;
+  { label: "Mosque",          icon: mosqueIconUrl,      color: "#d4af37", darkIcon: false },
+  { label: "Shrine",          icon: shrineIconUrl,      color: "#40bea5", darkIcon: false },
+  { label: "Palace",          icon: palaceIconUrl,      color: "#b478dc", darkIcon: false },
+  { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#ffffff", darkIcon: true  },
+  { label: "Others",          icon: othersIconUrl,      color: "#6ea8fe", darkIcon: false },
+];
 
 type CategoryLabel = (typeof CATEGORIES)[number]["label"];
 
@@ -54,13 +54,15 @@ function getCategoryMeta(raw: string) {
 
 const iconCache: Record<string, L.DivIcon> = {};
 
-function makeMarkerIcon(iconUrl: string, color: string, featured: boolean) {
-  const key = `${iconUrl}-${color}-${featured}`;
+function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkIcon = false) {
+  const key = `${iconUrl}-${color}-${featured}-${darkIcon}`;
   if (iconCache[key]) return iconCache[key];
 
   const size = 22;
   const imgPad = Math.round(size * 0.22);
   const imgSize = size - imgPad * 2;
+  const imgFilter = darkIcon ? "brightness(0)" : "brightness(0) invert(1)";
+  const border = darkIcon ? "2px solid rgba(0,0,0,0.25)" : "2px solid rgba(255,255,255,0.35)";
 
   const icon = L.divIcon({
     html: `
@@ -68,14 +70,14 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean) {
         width:${size}px;height:${size}px;
         background:${color};
         border-radius:50%;
-        border:2px solid rgba(255,255,255,0.35);
-        box-shadow:0 2px 10px rgba(0,0,0,0.55)${featured ? ",0 0 0 3px " + color + "55" : ""};
+        border:${border};
+        box-shadow:0 2px 10px rgba(0,0,0,0.55)${featured ? ",0 0 0 3px rgba(0,0,0,0.3)" : ""};
         display:flex;align-items:center;justify-content:center;
         overflow:hidden;
       ">
         <img
           src="${iconUrl}"
-          style="width:${imgSize}px;height:${imgSize}px;filter:brightness(0) invert(1);object-fit:contain;"
+          style="width:${imgSize}px;height:${imgSize}px;filter:${imgFilter};object-fit:contain;"
         />
       </div>`,
     className: "",
@@ -195,7 +197,7 @@ export default function Explore() {
                   <Marker
                     key={site.id}
                     position={[site.latitude, site.longitude]}
-                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured)}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon)}
                     eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                   >
                     <Tooltip
@@ -327,7 +329,7 @@ export default function Explore() {
                 )}
               </div>
               <div className="grid grid-cols-1 gap-1">
-                {CATEGORIES.map(({ label, icon, color }) => {
+                {CATEGORIES.map(({ label, icon, color, darkIcon }) => {
                   const active = selectedCategory === label;
                   return (
                     <button
@@ -343,13 +345,13 @@ export default function Explore() {
                     >
                       <div
                         className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center"
-                        style={{ backgroundColor: color }}
+                        style={{ backgroundColor: color, border: darkIcon ? "1px solid rgba(0,0,0,0.2)" : undefined }}
                       >
                         <img
                           src={icon}
                           alt={label}
                           className="w-3.5 h-3.5 object-contain"
-                          style={{ filter: "brightness(0) invert(1)" }}
+                          style={{ filter: darkIcon ? "brightness(0)" : "brightness(0) invert(1)" }}
                         />
                       </div>
                       <span
