@@ -29,6 +29,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Al-Azhar Mosque":         "/site-images/al-azhar.jpg",
   "Sultan Salahuddin Abdul Aziz Shah Mosque": "",
   "Great Mosque of Tirana": "",
+  "Afsonalar Vodiysi Mosque": "/site-images/afsonalar-vodiysi.jpg",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
