@@ -191,11 +191,6 @@ export default function Home() {
           </div>
         </Link>
 
-        {/* ── Centre: Arabic invocation ── */}
-        <div className="absolute left-1/2 -translate-x-1/2 font-arabic text-lg tracking-wide select-none pointer-events-none" dir="rtl" style={{ color: "#39b163", opacity: 0.75 }}>
-          بسم الله الرحمن الرحيم
-        </div>
-
         <div className="flex items-center gap-4">
           <Link href="/explore">
             <span className="text-[13px] font-mono tracking-[0.08em] text-[#6b8099] hover:text-[#39b163] transition-colors cursor-pointer uppercase">Explore Map</span>
@@ -306,11 +301,6 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Arabic inscription */}
-            <div className="font-arabic text-4xl mb-4 opacity-30 pointer-events-none select-none" dir="rtl" style={{ color: "#39b163" }}>
-              بسم الله الرحمن الرحيم
-            </div>
-
             {/* H1 */}
             <h1
               className="font-bold leading-[1.05] mb-6"
@@ -351,22 +341,28 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right column — decorative Arabic calligraphy panel */}
+          {/* Right column — mosque names synced with hero */}
           <div className="hidden lg:flex col-span-5 flex-col items-end justify-center gap-6 text-right">
             {[
               { ar: "مسجد الحرام", en: "Masjid Al-Haram", sub: "Mecca, Saudi Arabia" },
               { ar: "المسجد الأقصى", en: "Masjid Al-Aqsa", sub: "Jerusalem, Palestine" },
               { ar: "قبة الصخرة", en: "Dome of the Rock", sub: "Jerusalem, Palestine" },
               { ar: "المسجد النبوي", en: "Masjid An-Nabawi", sub: "Medina, Saudi Arabia" },
+              { ar: "جامع الأزهر", en: "Al-Azhar Mosque", sub: "Cairo, Egypt" },
+              { ar: "مسجد كوردوبا", en: "Great Mosque of Cordoba", sub: "Cordoba, Spain" },
             ].map((item, i) => (
               <div
                 key={i}
-                className="border-r-2 pr-4 transition-all"
-                style={{ borderColor: i === 0 ? "#39b163" : "#1c2530", opacity: i === 0 ? 1 : 0.45 }}
+                className="border-r-2 pr-4 transition-all duration-700"
+                style={{
+                  borderColor: i === heroIndex ? "#39b163" : "#1c2530",
+                  opacity: i === heroIndex ? 1 : 0.35,
+                  transform: i === heroIndex ? "translateX(0)" : "translateX(6px)",
+                }}
               >
-                <p className="font-arabic text-xl leading-none" style={{ color: i === 0 ? "#39b163" : "#3d5066" }} dir="rtl">{item.ar}</p>
-                <p className="text-[11px] font-mono tracking-[0.12em] uppercase mt-1" style={{ color: i === 0 ? "#8a9eb5" : "#2d3f52" }}>{item.en}</p>
-                <p className="text-[10px] font-mono" style={{ color: "#2d3f52" }}>{item.sub}</p>
+                <p className="font-arabic text-xl leading-none transition-colors duration-700" style={{ color: i === heroIndex ? "#39b163" : "#3d5066" }} dir="rtl">{item.ar}</p>
+                <p className="text-[11px] font-mono tracking-[0.12em] uppercase mt-1 transition-colors duration-700" style={{ color: i === heroIndex ? "#8a9eb5" : "#2d3f52" }}>{item.en}</p>
+                <p className="text-[10px] font-mono transition-colors duration-700" style={{ color: i === heroIndex ? "#4d617a" : "#2d3f52" }}>{item.sub}</p>
               </div>
             ))}
           </div>
