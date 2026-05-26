@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useMemo, Suspense } from "react";
 import { useRoute, Link } from "wouter";
 import { useGetSite } from "@workspace/api-client-react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls, Html, useGLTF, Center, Bounds } from "@react-three/drei";
 import * as THREE from "three";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import {
   MapPin,
   Calendar,
@@ -269,6 +270,91 @@ function UsdzFallback({ src, name }: { src: string; name: string }) {
         Tap to open the 3D model in Apple AR Quick Look on iPhone or iPad.
       </p>
     </div>
+  );
+}
+
+// ─── OBJ Model loader ──────────────────────────────────────────────────────────
+function ObjMesh({
+  url,
+  hotspots,
+  onHotspotClick,
+  activeHotspot,
+  annotateMode,
+  onAnnotate,
+  onClose,
+}: {
+  url: string;
+  hotspots: Hotspot[];
+  onHotspotClick?: (h: Hotspot) => void;
+  activeHotspot: Hotspot | null;
+  annotateMode?: boolean;
+  onAnnotate?: (pos: { x: number; y: number; z: number }) => void;
+  onClose?: () => void;
+}) {
+  const obj = useLoader(OBJLoader, url);
+  const groupRef = useRef<THREE.Group>(null);
+
+  const hotspotRadius = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(obj);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    return maxDim > 0 ? maxDim * 0.018 : 0.06;
+  }, [obj]);
+
+  return (
+    <Center>
+      <group
+        ref={groupRef}
+        onPointerDown={annotateMode ? (e: any) => {
+          e.stopPropagation();
+          if (e.point && groupRef.current) {
+            const local = groupRef.current.worldToLocal(e.point.clone());
+            onAnnotate?.({ x: local.x, y: local.y, z: local.z });
+          }
+        } : undefined}
+      >
+        <primitive object={obj} />
+        {hotspots.map((h, i) => {
+          const isActive = activeHotspot?.id === h.id;
+          return (
+            <group key={h.id} position={[h.positionX, h.positionY, h.positionZ]}>
+              <mesh
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onHotspotClick?.(h);
+                }}
+              >
+                <sphereGeometry args={[hotspotRadius, 16, 16]} />
+                <meshStandardMaterial
+                  color={isActive ? "#c9a227" : "#39b163"}
+                  emissive={isActive ? "#c9a227" : "#39b163"}
+                  emissiveIntensity={0.6}
+                  transparent
+                  opacity={0.85}
+                />
+              </mesh>
+              {isActive && (
+                <Html distanceFactor={10}>
+                  <div
+                    className="bg-card/95 text-card-foreground px-3 py-2 rounded-lg shadow-lg border border-border/70 text-xs backdrop-blur-md"
+                    style={{ minWidth: "180px", maxWidth: "260px" }}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="font-semibold text-primary">{h.label}</span>
+                      <button onClick={() => onClose?.()} className="text-muted-foreground hover:text-foreground">
+                        ✕
+                      </button>
+                    </div>
+                    <p className="text-muted-foreground leading-snug">{h.description}</p>
+                  </div>
+                </Html>
+              )}
+            </group>
+          );
+        })}
+      </group>
+    </Center>
   );
 }
 
@@ -741,15 +827,27 @@ export default function SiteDetail() {
                   <Suspense fallback={null}>
                     <Bounds fit clip observe margin={1.3}>
                       {site.modelUrl ? (
-                        <GltfMesh
-                          url={site.modelUrl}
-                          hotspots={hotspots}
-                          onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
-                          activeHotspot={activeHotspot}
-                          annotateMode={annotateMode}
-                          onAnnotate={(pos) => setPendingPos(pos)}
-                          onClose={() => setActiveHotspot(null)}
-                        />
+                        site.modelUrl.endsWith(".obj") ? (
+                          <ObjMesh
+                            url={site.modelUrl}
+                            hotspots={hotspots}
+                            onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                            activeHotspot={activeHotspot}
+                            annotateMode={annotateMode}
+                            onAnnotate={(pos) => setPendingPos(pos)}
+                            onClose={() => setActiveHotspot(null)}
+                          />
+                        ) : (
+                          <GltfMesh
+                            url={site.modelUrl}
+                            hotspots={hotspots}
+                            onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                            activeHotspot={activeHotspot}
+                            annotateMode={annotateMode}
+                            onAnnotate={(pos) => setPendingPos(pos)}
+                            onClose={() => setActiveHotspot(null)}
+                          />
+                        )
                       ) : (
                         <MosqueMesh
                           hotspots={hotspots}
