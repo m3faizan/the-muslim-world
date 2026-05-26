@@ -76,6 +76,7 @@ export const GetSiteResponse = zod.object({
   "eidPrayer": zod.boolean().optional(),
   "ramadanVisit": zod.boolean().optional(),
   "jumaPrayer": zod.boolean().optional(),
+  "sect": zod.string().nullish().describe('Islamic tradition or denomination (e.g. Sunni, Shia, Universal)'),
   "hotspots": zod.array(zod.object({
   "id": zod.number(),
   "siteId": zod.number(),
@@ -119,7 +120,8 @@ export const UpdateSiteBody = zod.object({
   "dualUse": zod.string().nullish(),
   "eidPrayer": zod.boolean().optional(),
   "ramadanVisit": zod.boolean().optional(),
-  "jumaPrayer": zod.boolean().optional()
+  "jumaPrayer": zod.boolean().optional(),
+  "sect": zod.string().nullish()
 })
 
 export const UpdateSiteResponse = zod.object({
@@ -145,6 +147,7 @@ export const UpdateSiteResponse = zod.object({
   "eidPrayer": zod.boolean().optional(),
   "ramadanVisit": zod.boolean().optional(),
   "jumaPrayer": zod.boolean().optional(),
+  "sect": zod.string().nullish().describe('Islamic tradition or denomination (e.g. Sunni, Shia, Universal)'),
   "hotspots": zod.array(zod.object({
   "id": zod.number(),
   "siteId": zod.number(),

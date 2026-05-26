@@ -321,6 +321,9 @@ components:
           type: boolean
         jumaPrayer:
           type: boolean
+        sect:
+          type: ["string", "null"]
+          description: Islamic tradition or denomination (e.g. Sunni, Shia, Universal)
         hotspots:
           type: array
           items:
@@ -373,6 +376,8 @@ components:
           type: boolean
         jumaPrayer:
           type: boolean
+        sect:
+          type: ["string", "null"]
 
     RegionGroup:
       type: object

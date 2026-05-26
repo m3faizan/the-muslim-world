@@ -128,6 +128,11 @@ export interface SiteDetail {
   eidPrayer?: boolean;
   ramadanVisit?: boolean;
   jumaPrayer?: boolean;
+  /**
+     * Islamic tradition or denomination (e.g. Sunni, Shia, Universal)
+     * @nullable
+     */
+  sect?: string | null;
   hotspots: Hotspot[];
 }
 
@@ -160,6 +165,8 @@ export interface UpdateSite {
   eidPrayer?: boolean;
   ramadanVisit?: boolean;
   jumaPrayer?: boolean;
+  /** @nullable */
+  sect?: string | null;
 }
 
 export interface RegionGroup {

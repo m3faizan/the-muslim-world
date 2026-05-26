@@ -35,4 +35,6 @@ export interface UpdateSite {
   eidPrayer?: boolean;
   ramadanVisit?: boolean;
   jumaPrayer?: boolean;
+  /** @nullable */
+  sect?: string | null;
 }

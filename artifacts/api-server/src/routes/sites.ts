@@ -38,6 +38,7 @@ const UpdateSiteBody = z.object({
   eidPrayer: z.boolean().optional(),
   ramadanVisit: z.boolean().optional(),
   jumaPrayer: z.boolean().optional(),
+  sect: z.string().nullable().optional(),
 });
 
 const router = Router();
@@ -160,6 +161,7 @@ function formatSiteDetail(s: typeof sitesTable.$inferSelect) {
     capacity: s.capacity ?? null,
     areaSqm: s.areaSqm ?? null,
     dualUse: s.dualUse ?? null,
+    sect: s.sect ?? null,
   };
 }
 

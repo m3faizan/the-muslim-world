@@ -25,6 +25,7 @@ export const sitesTable = pgTable("sites", {
   eidPrayer: boolean("eid_prayer").notNull().default(false),
   ramadanVisit: boolean("ramadan_visit").notNull().default(false),
   jumaPrayer: boolean("juma_prayer").notNull().default(false),
+  sect: text("sect"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

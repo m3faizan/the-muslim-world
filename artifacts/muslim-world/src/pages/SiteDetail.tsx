@@ -426,6 +426,7 @@ export default function SiteDetail() {
       eidPrayer: site.eidPrayer ?? false,
       ramadanVisit: site.ramadanVisit ?? false,
       jumaPrayer: site.jumaPrayer ?? false,
+      sect: (site as any).sect ?? "",
     });
     setEditOpen(true);
   };
@@ -441,7 +442,7 @@ export default function SiteDetail() {
     if (body.areaSqm !== "") body.areaSqm = body.areaSqm === "" ? null : Number(body.areaSqm);
     else body.areaSqm = null;
     // empty strings → null for nullable fields
-    ["yearFounded", "architecturalStyle", "dualUse", "modelUrl", "imageUrl"].forEach((k) => {
+    ["yearFounded", "architecturalStyle", "dualUse", "modelUrl", "imageUrl", "sect"].forEach((k) => {
       if (body[k] === "") body[k] = null;
     });
     const res = await fetch(`/api/sites/${siteId}`, {
@@ -814,6 +815,30 @@ export default function SiteDetail() {
             </div>
           )}
 
+          {/* ── Islamic Tradition ── */}
+          {(site as any).sect && (() => {
+            const SECT_META: Record<string, { color: string; bg: string; border: string; desc: string }> = {
+              "Universal":  { color: "#d4af37", bg: "#1a1400", border: "#d4af3760", desc: "Revered by all Muslims worldwide" },
+              "Sunni":      { color: "#39b163", bg: "#001a0a", border: "#39b16360", desc: "Significant in Sunni Islamic tradition" },
+              "Shia":       { color: "#6080e0", bg: "#0a0d1a", border: "#6080e060", desc: "Significant in Shia Islamic tradition" },
+              "Sufi":       { color: "#b478dc", bg: "#12001a", border: "#b478dc60", desc: "Associated with Sufi/mystical tradition" },
+              "Ibadi":      { color: "#40bea5", bg: "#001a16", border: "#40bea560", desc: "Associated with Ibadi Islamic tradition" },
+            };
+            const meta = SECT_META[(site as any).sect] ?? { color: "#8090a0", bg: "#0d1117", border: "#8090a060", desc: "Islamic heritage site" };
+            return (
+              <div className="rounded-xl border p-4" style={{ background: meta.bg, borderColor: meta.border }}>
+                <h3 className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: meta.color + "cc" }}>Islamic Tradition</h3>
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: meta.color }} />
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: meta.color }}>{(site as any).sect}</p>
+                    <p className="text-xs mt-0.5" style={{ color: meta.color + "99" }}>{meta.desc}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* ── Visited / Prayed tracker ── */}
           {user ? (
             <div className="rounded-xl border border-border bg-card p-4">
@@ -1128,6 +1153,21 @@ export default function SiteDetail() {
               <div>
                 <p className="text-xs font-mono uppercase tracking-wider text-amber-400/70 mb-3">Details</p>
                 <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="text-xs text-muted-foreground block mb-1">Islamic Tradition / Sect</label>
+                    <select
+                      value={editForm.sect ?? ""}
+                      onChange={(e) => setEditForm((f) => ({ ...f, sect: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg text-xs bg-card border border-border text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                    >
+                      <option value="">— Not set —</option>
+                      <option value="Universal">Universal (all Muslims)</option>
+                      <option value="Sunni">Sunni</option>
+                      <option value="Shia">Shia</option>
+                      <option value="Sufi">Sufi</option>
+                      <option value="Ibadi">Ibadi</option>
+                    </select>
+                  </div>
                   {[
                     { key: "architecturalStyle", label: "Architectural Style" },
                     { key: "dualUse", label: "Secondary Function" },
