@@ -30,6 +30,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Sultan Salahuddin Abdul Aziz Shah Mosque": "",
   "Great Mosque of Tirana": "",
   "Afsonalar Vodiysi Mosque": "/site-images/afsonalar-vodiysi.jpg",
+  "Kudhu Miskiyy": "/site-images/kudhu-miskiyy.jpg",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
