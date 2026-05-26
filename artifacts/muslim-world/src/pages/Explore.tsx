@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useListSites, useListSitesByRegion, useListFeaturedSites } from "@workspace/api-client-react";
 import { MapPin, Map, ChevronRight, Star, Layers, PanelRightClose, PanelRightOpen } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -54,8 +54,8 @@ function getCategoryMeta(raw: string) {
 
 const iconCache: Record<string, L.DivIcon> = {};
 
-function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkIcon = false) {
-  const key = `${iconUrl}-${color}-${featured}-${darkIcon}`;
+function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkIcon = false, label = "") {
+  const key = `${iconUrl}-${color}-${featured}-${darkIcon}-${label}`;
   if (iconCache[key]) return iconCache[key];
 
   const size = 22;
@@ -64,21 +64,40 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
   const imgFilter = darkIcon ? "brightness(0)" : "brightness(0) invert(1)";
   const border = darkIcon ? "2px solid rgba(0,0,0,0.25)" : "2px solid rgba(255,255,255,0.35)";
 
+  const labelHtml = label
+    ? `<div style="
+        position:absolute;
+        top:${size + 4}px;
+        left:50%;
+        transform:translateX(-50%);
+        white-space:nowrap;
+        color:#ffffff;
+        font-size:11px;
+        font-weight:700;
+        font-family:sans-serif;
+        text-shadow:0 1px 4px rgba(0,0,0,0.9),0 0 8px rgba(0,0,0,0.8);
+        pointer-events:none;
+      ">${label}</div>`
+    : "";
+
   const icon = L.divIcon({
     html: `
-      <div style="
-        width:${size}px;height:${size}px;
-        background:${color};
-        border-radius:50%;
-        border:${border};
-        box-shadow:0 2px 10px rgba(0,0,0,0.55)${featured ? ",0 0 0 3px rgba(0,0,0,0.3)" : ""};
-        display:flex;align-items:center;justify-content:center;
-        overflow:hidden;
-      ">
-        <img
-          src="${iconUrl}"
-          style="width:${imgSize}px;height:${imgSize}px;filter:${imgFilter};object-fit:contain;"
-        />
+      <div style="position:relative;width:${size}px;height:${size}px;">
+        <div style="
+          width:${size}px;height:${size}px;
+          background:${color};
+          border-radius:50%;
+          border:${border};
+          box-shadow:0 2px 10px rgba(0,0,0,0.55)${featured ? ",0 0 0 3px rgba(0,0,0,0.3)" : ""};
+          display:flex;align-items:center;justify-content:center;
+          overflow:hidden;
+        ">
+          <img
+            src="${iconUrl}"
+            style="width:${imgSize}px;height:${imgSize}px;filter:${imgFilter};object-fit:contain;"
+          />
+        </div>
+        ${labelHtml}
       </div>`,
     className: "",
     iconSize: [size, size],
@@ -88,6 +107,11 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
 
   iconCache[key] = icon;
   return icon;
+}
+
+function ZoomTracker({ onZoom }: { onZoom: (z: number) => void }) {
+  useMapEvents({ zoomend: (e) => onZoom(e.target.getZoom()) });
+  return null;
 }
 
 function FlyToRegion({ region, sites }: { region: string | null; sites: Site[] }) {
@@ -110,6 +134,7 @@ export default function Explore() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryLabel | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showFeatured, setShowFeatured] = useState(false);
+  const [zoom, setZoom] = useState(3);
 
   const { data: sites = [], isLoading } = useListSites();
   const { data: regions = [] } = useListSitesByRegion();
@@ -189,15 +214,17 @@ export default function Explore() {
                 maxZoom={19}
               />
 
+              <ZoomTracker onZoom={setZoom} />
               <FlyToRegion region={selectedRegion} sites={filteredByRegion} />
 
               {displayedSites.map((site) => {
                 const meta = getCategoryMeta(site.category);
+                const label = zoom >= 6 ? site.name : "";
                 return (
                   <Marker
                     key={site.id}
                     position={[site.latitude, site.longitude]}
-                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon)}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label)}
                     eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                   >
                     <Tooltip
