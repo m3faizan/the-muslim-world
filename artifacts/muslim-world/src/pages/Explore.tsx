@@ -32,7 +32,7 @@ const CATEGORIES = [
   { label: "Mosque",          icon: mosqueIconUrl,      color: "#d4af37", darkIcon: false },
   { label: "Shrine",          icon: shrineIconUrl,      color: "#40bea5", darkIcon: false },
   { label: "Palace",          icon: palaceIconUrl,      color: "#b478dc", darkIcon: false },
-  { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#ffffff", darkIcon: true  },
+  { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#f4a7c3", darkIcon: true  },
   { label: "Others",          icon: othersIconUrl,      color: "#6ea8fe", darkIcon: false },
 ];
 
