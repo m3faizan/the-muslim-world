@@ -6,6 +6,12 @@ import { MapContainer, TileLayer, Marker, Tooltip, useMap } from "react-leaflet"
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+import mosqueIconUrl from "@assets/mosque_1779811630170.png";
+import othersIconUrl from "@assets/Others_1779811630171.png";
+import pilgrimageIconUrl from "@assets/Pilgrimage_site_1779811630173.png";
+import palaceIconUrl from "@assets/Palace_1779811630174.png";
+import shrineIconUrl from "@assets/Shrine_1779811630175.png";
+
 type Site = {
   id: number;
   name: string;
@@ -22,40 +28,64 @@ type Site = {
   imageUrl: string | null;
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  mosque: "#d4af37",
-  shrine: "#40bea5",
-  palace: "#b478dc",
-  fortress: "#dc7850",
-  city: "#6ea8fe",
-  Mosque: "#d4af37",
-  Shrine: "#40bea5",
-  Miqat: "#e8a838",
-  "Pilgrimage Site": "#e05c5c",
-};
+const CATEGORIES = [
+  { label: "Mosque",          icon: mosqueIconUrl,      color: "#d4af37" },
+  { label: "Shrine",          icon: shrineIconUrl,      color: "#40bea5" },
+  { label: "Palace",          icon: palaceIconUrl,      color: "#b478dc" },
+  { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#e05c5c" },
+  { label: "Others",          icon: othersIconUrl,      color: "#6ea8fe" },
+] as const;
 
-function getCategoryColor(category: string) {
-  return CATEGORY_COLORS[category] ?? "#d4af37";
+type CategoryLabel = (typeof CATEGORIES)[number]["label"];
+
+function normalizeCategory(raw: string): CategoryLabel {
+  const c = raw.toLowerCase().trim();
+  if (c === "mosque")                             return "Mosque";
+  if (c === "shrine")                             return "Shrine";
+  if (c === "palace")                             return "Palace";
+  if (c === "miqat" || c === "pilgrimage site")  return "Pilgrimage Site";
+  return "Others";
 }
 
-function makeMarkerIcon(color: string, featured: boolean) {
-  const size = featured ? 18 : 14;
-  const ring = featured
-    ? `<circle cx="12" cy="12" r="10" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.4"/>`
-    : "";
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size * 2}" height="${size * 2}" viewBox="0 0 24 24">
-      ${ring}
-      <circle cx="12" cy="12" r="6" fill="${color}" opacity="0.95"/>
-      <circle cx="12" cy="12" r="3" fill="white" opacity="0.7"/>
-    </svg>`;
-  return L.divIcon({
-    html: svg,
+function getCategoryMeta(raw: string) {
+  const label = normalizeCategory(raw);
+  return CATEGORIES.find((c) => c.label === label) ?? CATEGORIES[4];
+}
+
+const iconCache: Record<string, L.DivIcon> = {};
+
+function makeMarkerIcon(iconUrl: string, color: string, featured: boolean) {
+  const key = `${iconUrl}-${color}-${featured}`;
+  if (iconCache[key]) return iconCache[key];
+
+  const size = featured ? 42 : 32;
+  const imgPad = Math.round(size * 0.22);
+  const imgSize = size - imgPad * 2;
+
+  const icon = L.divIcon({
+    html: `
+      <div style="
+        width:${size}px;height:${size}px;
+        background:${color};
+        border-radius:50%;
+        border:2px solid rgba(255,255,255,0.35);
+        box-shadow:0 2px 10px rgba(0,0,0,0.55)${featured ? ",0 0 0 3px " + color + "55" : ""};
+        display:flex;align-items:center;justify-content:center;
+        overflow:hidden;
+      ">
+        <img
+          src="${iconUrl}"
+          style="width:${imgSize}px;height:${imgSize}px;filter:brightness(0) invert(1);object-fit:contain;"
+        />
+      </div>`,
     className: "",
-    iconSize: [size * 2, size * 2],
-    iconAnchor: [size, size],
-    tooltipAnchor: [size, 0],
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    tooltipAnchor: [size / 2, 0],
   });
+
+  iconCache[key] = icon;
+  return icon;
 }
 
 function FlyToRegion({ region, sites }: { region: string | null; sites: Site[] }) {
@@ -75,6 +105,7 @@ function FlyToRegion({ region, sites }: { region: string | null; sites: Site[] }
 export default function Explore() {
   const [, navigate] = useLocation();
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryLabel | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showFeatured, setShowFeatured] = useState(false);
 
@@ -82,16 +113,24 @@ export default function Explore() {
   const { data: regions = [] } = useListSitesByRegion();
   const { data: featuredSites = [] } = useListFeaturedSites();
 
-  const filteredSites = selectedRegion
+  const filteredByRegion = selectedRegion
     ? (sites as Site[]).filter((s) => s.region === selectedRegion)
     : (sites as Site[]);
 
-  const displayedSites = showFeatured ? (featuredSites as Site[]) : filteredSites;
+  const regionOrFeatured = showFeatured ? (featuredSites as Site[]) : filteredByRegion;
+
+  const displayedSites = selectedCategory
+    ? regionOrFeatured.filter((s) => normalizeCategory(s.category) === selectedCategory)
+    : regionOrFeatured;
+
+  function toggleCategory(label: CategoryLabel) {
+    setSelectedCategory((prev) => (prev === label ? null : label));
+  }
 
   return (
     <div className="flex flex-col h-screen w-screen bg-background overflow-hidden">
 
-      {/* ── Full-width top nav ───────────────────────────────── */}
+      {/* ── Top nav ─────────────────────────────────────── */}
       <div className="flex items-center justify-between px-5 py-3 bg-background/95 border-b border-border z-30 flex-shrink-0">
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer">
@@ -114,13 +153,12 @@ export default function Explore() {
           >
             {sidebarOpen
               ? <PanelRightClose className="w-4 h-4" />
-              : <PanelRightOpen className="w-4 h-4" />
-            }
+              : <PanelRightOpen className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      {/* ── Content row ─────────────────────────────────────── */}
+      {/* ── Content row ─────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
 
         {/* Map */}
@@ -149,37 +187,39 @@ export default function Explore() {
                 maxZoom={19}
               />
 
-              <FlyToRegion region={selectedRegion} sites={filteredSites} />
+              <FlyToRegion region={selectedRegion} sites={filteredByRegion} />
 
-              {displayedSites.map((site) => (
-                <Marker
-                  key={site.id}
-                  position={[site.latitude, site.longitude]}
-                  icon={makeMarkerIcon(getCategoryColor(site.category), site.isFeatured)}
-                  eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
-                >
-                  <Tooltip
-                    direction="top"
-                    offset={[0, -8]}
-                    opacity={1}
-                    className="explore-tooltip"
+              {displayedSites.map((site) => {
+                const meta = getCategoryMeta(site.category);
+                return (
+                  <Marker
+                    key={site.id}
+                    position={[site.latitude, site.longitude]}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured)}
+                    eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                   >
-                    <div className="text-center min-w-[120px]">
-                      <p className="font-semibold text-sm text-foreground leading-tight">{site.name}</p>
-                      <p className="font-arabic text-xs text-primary/70 mt-0.5" dir="rtl">{site.arabicName}</p>
-                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
-                        <MapPin className="w-3 h-3" />
-                        <span>{site.country}</span>
+                    <Tooltip
+                      direction="top"
+                      offset={[0, -8]}
+                      opacity={1}
+                      className="explore-tooltip"
+                    >
+                      <div className="text-center min-w-[120px]">
+                        <p className="font-semibold text-sm text-foreground leading-tight">{site.name}</p>
+                        <p className="font-arabic text-xs text-primary/70 mt-0.5" dir="rtl">{site.arabicName}</p>
+                        <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
+                          <MapPin className="w-3 h-3" />
+                          <span>{site.country}</span>
+                        </div>
+                        <p className="text-xs text-primary/80 mt-1">Click to explore →</p>
                       </div>
-                      <p className="text-xs text-primary/80 mt-1">Click to explore →</p>
-                    </div>
-                  </Tooltip>
-                </Marker>
-              ))}
+                    </Tooltip>
+                  </Marker>
+                );
+              })}
             </MapContainer>
           )}
 
-          {/* Mobile-only overlay toggle (bottom-right fab) */}
           {!sidebarOpen && (
             <button
               onClick={() => setSidebarOpen(true)}
@@ -200,7 +240,6 @@ export default function Explore() {
             max-lg:fixed max-lg:top-[49px] max-lg:right-0 max-lg:h-[calc(100vh-49px)] max-lg:z-40
           `}
         >
-          {/* Inner wrapper prevents content flash during collapse */}
           <div className="w-[272px] flex flex-col h-full overflow-hidden">
 
             {/* Header */}
@@ -213,9 +252,9 @@ export default function Explore() {
             <div className="p-3 border-b border-border flex-shrink-0 space-y-2">
               <div className="flex gap-2">
                 <button
-                  onClick={() => { setShowFeatured(false); setSelectedRegion(null); }}
+                  onClick={() => { setShowFeatured(false); setSelectedRegion(null); setSelectedCategory(null); }}
                   className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
-                    !showFeatured && !selectedRegion
+                    !showFeatured && !selectedRegion && !selectedCategory
                       ? "bg-primary text-primary-foreground border-primary"
                       : "border-border text-muted-foreground hover:text-foreground"
                   }`}
@@ -223,7 +262,7 @@ export default function Explore() {
                   All Sites
                 </button>
                 <button
-                  onClick={() => { setShowFeatured(true); setSelectedRegion(null); }}
+                  onClick={() => { setShowFeatured(true); setSelectedRegion(null); setSelectedCategory(null); }}
                   className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors flex items-center justify-center gap-1 ${
                     showFeatured
                       ? "bg-primary text-primary-foreground border-primary"
@@ -248,39 +287,85 @@ export default function Explore() {
 
             {/* Site list */}
             <div className="flex-1 overflow-y-auto">
-              {displayedSites.map((site) => (
-                <Link key={site.id} href={`/site/${site.id}`}>
-                  <div className="flex items-start gap-3 p-3.5 border-b border-border/50 hover:bg-card/60 cursor-pointer transition-colors group">
-                    <div
-                      className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
-                      style={{ backgroundColor: getCategoryColor(site.category) }}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                        {site.name}
-                      </p>
-                      <p className="font-arabic text-xs text-primary/50 truncate" dir="rtl">{site.arabicName}</p>
-                      <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
-                        <MapPin className="w-2.5 h-2.5" />
-                        <span>{site.country}</span>
+              {displayedSites.map((site) => {
+                const meta = getCategoryMeta(site.category);
+                return (
+                  <Link key={site.id} href={`/site/${site.id}`}>
+                    <div className="flex items-start gap-3 p-3.5 border-b border-border/50 hover:bg-card/60 cursor-pointer transition-colors group">
+                      <div
+                        className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                        style={{ backgroundColor: meta.color }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                          {site.name}
+                        </p>
+                        <p className="font-arabic text-xs text-primary/50 truncate" dir="rtl">{site.arabicName}</p>
+                        <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
+                          <MapPin className="w-2.5 h-2.5" />
+                          <span>{site.country}</span>
+                        </div>
                       </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-1" />
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-1" />
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
 
-            {/* Legend */}
+            {/* Legend — clickable category filter */}
             <div className="p-3.5 border-t border-border flex-shrink-0">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Legend</p>
-              <div className="grid grid-cols-2 gap-1.5">
-                {Object.entries(CATEGORY_COLORS).map(([label, color]) => (
-                  <div key={label} className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                    <span className="text-xs text-muted-foreground capitalize">{label}</span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-muted-foreground">Legend</p>
+                {selectedCategory && (
+                  <button
+                    onClick={() => setSelectedCategory(null)}
+                    className="text-[10px] text-primary hover:underline"
+                  >
+                    Clear filter
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 gap-1">
+                {CATEGORIES.map(({ label, icon, color }) => {
+                  const active = selectedCategory === label;
+                  return (
+                    <button
+                      key={label}
+                      onClick={() => toggleCategory(label)}
+                      className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-all ${
+                        active
+                          ? "bg-card border border-border/80 ring-1 ring-offset-0"
+                          : "hover:bg-card/50 border border-transparent"
+                      }`}
+                      style={active ? { ringColor: color } : {}}
+                      title={`Filter by ${label}`}
+                    >
+                      <div
+                        className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center"
+                        style={{ backgroundColor: color }}
+                      >
+                        <img
+                          src={icon}
+                          alt={label}
+                          className="w-3.5 h-3.5 object-contain"
+                          style={{ filter: "brightness(0) invert(1)" }}
+                        />
+                      </div>
+                      <span
+                        className="text-xs transition-colors"
+                        style={{ color: active ? color : undefined }}
+                      >
+                        {label}
+                      </span>
+                      {active && (
+                        <span className="ml-auto text-[10px] text-muted-foreground">
+                          {displayedSites.length}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
