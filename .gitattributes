@@ -18,3 +18,5 @@ artifacts/muslim-world/public/models/miqat-dhat-irq.glb filter=lfs diff=lfs merg
 attached_assets/miqat_dhat_irq_1779923370612.glb filter=lfs diff=lfs merge=lfs -text
 artifacts/muslim-world/public/models/masjid-ayesha.glb filter=lfs diff=lfs merge=lfs -text
 attached_assets/Masjid_Ayesha_1779923525011.glb filter=lfs diff=lfs merge=lfs -text
+artifacts/muslim-world/public/models/al-fuqayr-well.glb filter=lfs diff=lfs merge=lfs -text
+attached_assets/Al_Fuqayr_Well_1779923934309.glb filter=lfs diff=lfs merge=lfs -text

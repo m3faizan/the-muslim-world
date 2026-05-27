@@ -45,6 +45,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Masjid Ayesha": "",
   "Miqat Yalamlam": "",
   "Miqat Dhat Irq": "",
+  "Al Fuqayr Well": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
