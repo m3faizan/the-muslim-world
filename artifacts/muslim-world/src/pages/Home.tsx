@@ -35,6 +35,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Al Mohamadi Mosque": "/site-images/al-mohamadi-mosque.jpg",
   "White Mosque": "/site-images/white-mosque-bolgar.jpg",
   "Mina": "",
+  "Jamarat": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
