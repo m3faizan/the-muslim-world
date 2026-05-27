@@ -798,8 +798,23 @@ export default function SiteDetail() {
               </div>
             )}
 
-            {/* 3D Viewer — USDZ AR link for iOS, R3F Canvas for GLB */}
-            {site.modelUrl && site.modelUrl.endsWith(".usdz") ? (
+            {/* 3D Viewer — image for photo-only sites, USDZ AR for iOS, R3F Canvas for GLB */}
+            {!site.modelUrl && site.imageUrl ? (
+              <div className="w-full h-full flex items-center justify-center bg-card relative overflow-hidden">
+                <img
+                  src={site.imageUrl}
+                  alt={site.name}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: "center" }}
+                />
+                <div
+                  className="absolute bottom-0 left-0 right-0 px-4 py-3"
+                  style={{ background: "linear-gradient(to top, rgba(5,8,12,0.9) 0%, rgba(5,8,12,0.4) 60%, transparent 100%)" }}
+                >
+                  <p className="text-xs text-muted-foreground font-mono">Photo of {site.name}</p>
+                </div>
+              </div>
+            ) : site.modelUrl && site.modelUrl.endsWith(".usdz") ? (
               <UsdzFallback src={site.modelUrl} name={site.name} />
             ) : (
               <GlobeErrorBoundary
