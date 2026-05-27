@@ -42,6 +42,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Mount Hira": "/site-images/mount-hira.png",
   "Ghars Well": "",
   "Mount Uhud": "",
+  "Masjid Ayesha": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
