@@ -9,3 +9,5 @@ attached_assets/faisal_majid_1779797862177.glb filter=lfs diff=lfs merge=lfs -te
 artifacts/muslim-world/public/models/masjid-nimrah.glb filter=lfs diff=lfs merge=lfs -text
 attached_assets/masjid_Nimrah_1779899340133.glb filter=lfs diff=lfs merge=lfs -text
 attached_assets/Mikat+Al+Juhfah_1779921827490.glb filter=lfs diff=lfs merge=lfs -text
+artifacts/muslim-world/public/models/ghars-well.glb filter=lfs diff=lfs merge=lfs -text
+attached_assets/ghars+wells_1779922076941.glb filter=lfs diff=lfs merge=lfs -text
