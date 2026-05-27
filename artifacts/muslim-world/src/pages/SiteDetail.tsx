@@ -1123,7 +1123,7 @@ export default function SiteDetail() {
             <div className="rounded-xl border border-border bg-card p-5">
               <h3 className="font-semibold text-foreground mb-3">Quick Facts</h3>
               <div className="space-y-2 text-sm">
-                {(site as any).capacity && (
+                {Number((site as any).capacity) > 0 && (
                   <div className="flex justify-between items-start gap-3">
                     <span className="text-muted-foreground">Capacity</span>
                     <span className="text-foreground text-right">
@@ -1131,7 +1131,7 @@ export default function SiteDetail() {
                     </span>
                   </div>
                 )}
-                {(site as any).areaSqm && (
+                {Number((site as any).areaSqm) > 0 && (
                   <div className="flex justify-between items-start gap-3">
                     <span className="text-muted-foreground">Area</span>
                     <span className="text-foreground text-right">
