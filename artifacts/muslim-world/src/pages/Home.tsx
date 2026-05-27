@@ -36,6 +36,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "White Mosque": "/site-images/white-mosque-bolgar.jpg",
   "Mina": "",
   "Jamarat": "",
+  "Masjid Nimrah": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
