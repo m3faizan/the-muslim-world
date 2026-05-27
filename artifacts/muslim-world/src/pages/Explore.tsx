@@ -219,7 +219,7 @@ export default function Explore() {
 
               {displayedSites.map((site) => {
                 const meta = getCategoryMeta(site.category);
-                const label = zoom >= 6 ? site.name : "";
+                const label = zoom >= 9 ? site.name : zoom >= 7 && site.isFeatured ? site.name : "";
                 return (
                   <Marker
                     key={site.id}
