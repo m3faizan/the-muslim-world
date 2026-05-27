@@ -37,6 +37,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Mina": "",
   "Jamarat": "",
   "Masjid Nimrah": "",
+  "Muzdalifah": "/site-images/muzdalifah.png",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
