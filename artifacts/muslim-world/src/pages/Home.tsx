@@ -40,6 +40,8 @@ const SITE_PHOTOS: Record<string, string> = {
   "Muzdalifah": "/site-images/muzdalifah.png",
   "Mount Thawr": "/site-images/mount-thawr.png",
   "Mount Hira": "/site-images/mount-hira.png",
+  "Ghars Well": "",
+  "Mount Uhud": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -52,6 +54,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   Shrine: "#3bb5a0",
   Miqat: "#d4962a",
   "Pilgrimage Site": "#c84040",
+  others: "#6ea8fe",
+  Others: "#6ea8fe",
 };
 
 const HISTORY: { year: string; event: string; loc: string }[] = [

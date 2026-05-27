@@ -33,7 +33,7 @@ const CATEGORIES = [
   { label: "Shrine",          icon: shrineIconUrl,      color: "#40bea5", darkIcon: false },
   { label: "Palace",          icon: palaceIconUrl,      color: "#b478dc", darkIcon: false },
   { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#f4a7c3", darkIcon: true  },
-  { label: "Others",          icon: othersIconUrl,      color: "#6ea8fe", darkIcon: false },
+  { label: "Islamic Landmarks", icon: othersIconUrl,      color: "#6ea8fe", darkIcon: false },
 ];
 
 type CategoryLabel = (typeof CATEGORIES)[number]["label"];
@@ -44,7 +44,7 @@ function normalizeCategory(raw: string): CategoryLabel {
   if (c === "shrine")                             return "Shrine";
   if (c === "palace")                             return "Palace";
   if (c === "miqat" || c === "pilgrimage site")  return "Pilgrimage Site";
-  return "Others";
+  return "Islamic Landmarks";
 }
 
 function getCategoryMeta(raw: string) {
