@@ -39,6 +39,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Masjid Nimrah": "",
   "Muzdalifah": "/site-images/muzdalifah.png",
   "Mount Thawr": "/site-images/mount-thawr.png",
+  "Mount Hira": "/site-images/mount-hira.png",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
