@@ -43,6 +43,8 @@ const SITE_PHOTOS: Record<string, string> = {
   "Ghars Well": "",
   "Mount Uhud": "",
   "Masjid Ayesha": "",
+  "Yalamlam": "",
+  "Miqat Al Juhfah": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
