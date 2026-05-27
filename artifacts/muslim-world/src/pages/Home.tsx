@@ -44,6 +44,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Mount Uhud": "",
   "Masjid Ayesha": "",
   "Miqat Yalamlam": "",
+  "Miqat Dhat Irq": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
