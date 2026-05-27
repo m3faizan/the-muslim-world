@@ -34,6 +34,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Ban Tok Chao Mosque": "/site-images/ban-tok-chao.jpg",
   "Al Mohamadi Mosque": "/site-images/al-mohamadi-mosque.jpg",
   "White Mosque": "/site-images/white-mosque-bolgar.jpg",
+  "Mina": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
