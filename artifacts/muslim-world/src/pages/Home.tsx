@@ -47,6 +47,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Miqat Dhat Irq": "",
   "Al Fuqayr Well": "",
   "Bani Unaif Mosque": "",
+  "Masjid Ghamama": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
