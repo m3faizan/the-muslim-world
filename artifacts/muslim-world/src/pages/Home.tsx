@@ -54,6 +54,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "The Seven Mosques": "",
   "Badr Battle Site": "",
   "Jabal Ayr": "",
+  "Masjid Al Fash": "/site-images/masjid-al-fash.png",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {

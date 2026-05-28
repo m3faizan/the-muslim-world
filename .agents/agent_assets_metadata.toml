@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "NFEA0j3cAF29l5YA-clb2"
+uri = "file://artifacts/muslim-world/public/site-images/masjid-al-fash.png"
+type = "image"
+title = "masjid al fash uhud"
