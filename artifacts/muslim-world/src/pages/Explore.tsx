@@ -67,7 +67,7 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
   const labelHtml = label
     ? `<div style="
         position:absolute;
-        top:${size + 4}px;
+        top:${size + 18}px;
         left:50%;
         transform:translateX(-50%);
         white-space:nowrap;
@@ -77,7 +77,12 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
         font-family:'IBM Plex Mono',monospace;
         text-shadow:0 1px 4px rgba(0,0,0,0.9),0 0 8px rgba(0,0,0,0.8);
         pointer-events:none;
-      ">${label}</div>`
+        padding:2px 8px;
+        background:rgba(0,0,0,0.35);
+        border-radius:4px;
+        line-height:1;
+      ">${label}</div>
+      <div style="position:absolute;top:${size}px;left:50%;transform:translateX(-50%);width:1px;height:16px;background:rgba(255,255,255,0.6);pointer-events:none;"></div>`
     : "";
 
   const icon = L.divIcon({
