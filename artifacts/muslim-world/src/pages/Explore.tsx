@@ -156,12 +156,16 @@ export default function Explore() {
   }
 
   // Label logic:
-  // - Zoom 0–6: no labels (global view is too crowded)
+  // - The three holiest sites (Haram, Nabawi, Aqsa) always show labels when enabled
+  // - Zoom 0–6: no other labels (global view is too crowded)
   // - Zoom 7–9: only featured/important sites get labels
   // - Zoom 10+: all sites get labels
   // - Toggle button can turn all labels off
+  const HOLIEST_SITE_IDS = new Set([1, 2, 3]); // Masjid Al-Haram, Masjid An-Nabawi, Masjid Al-Aqsa
   function shouldShowLabel(site: Site): boolean {
     if (!labelsOn) return false;
+    // The three holiest sites always show labels when labels are enabled
+    if (HOLIEST_SITE_IDS.has(site.id)) return true;
     if (zoom >= 10) return true;
     if (zoom >= 7 && site.isFeatured) return true;
     return false;
