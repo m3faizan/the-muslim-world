@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import { useListSites, useListSitesByRegion, useListFeaturedSites } from "@workspace/api-client-react";
 import { MapPin, Map, ChevronRight, Star, Layers, PanelRightClose, PanelRightOpen } from "lucide-react";
@@ -53,6 +53,7 @@ function getCategoryMeta(raw: string) {
 }
 
 const iconCache: Record<string, L.DivIcon> = {};
+const clusterCache: Record<string, L.DivIcon> = {};
 
 function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkIcon = false, label = "") {
   const key = `${iconUrl}-${color}-${featured}-${darkIcon}-${label}`;
@@ -109,8 +110,112 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
   return icon;
 }
 
+function makeClusterIcon(count: number, color: string) {
+  const key = `cluster-${count}-${color}`;
+  if (clusterCache[key]) return clusterCache[key];
+
+  const size = 44;
+  const icon = L.divIcon({
+    html: `
+      <div style="
+        position:relative;
+        width:${size}px;
+        height:${size}px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      ">
+        <div style="
+          width:${size}px;
+          height:${size}px;
+          background:rgba(0,0,0,0.45);
+          border:2.5px solid ${color};
+          border-radius:50%;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          box-shadow:0 2px 14px rgba(0,0,0,0.6);
+        ">
+          <span style="
+            color:${color};
+            font-size:15px;
+            font-weight:900;
+            font-family:'IBM Plex Mono',monospace;
+            line-height:1;
+          ">${count}</span>
+        </div>
+      </div>`,
+    className: "",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    tooltipAnchor: [size / 2, 0],
+  });
+
+  clusterCache[key] = icon;
+  return icon;
+}
+
+function getClusterRadius(zoom: number): number {
+  // tighter radius as zoom increases
+  if (zoom <= 5) return 2.5;
+  if (zoom <= 7) return 1.8;
+  if (zoom <= 9) return 1.0;
+  if (zoom <= 11) return 0.5;
+  return 0.2;
+}
+
+function clusterSites(sites: Site[], zoom: number): (Site | { type: "cluster"; sites: Site[]; center: [number, number]; id: string })[] {
+  const radius = getClusterRadius(zoom);
+  const clusters: { sites: Site[]; center: [number, number] }[] = [];
+  const assigned = new Set<number>();
+
+  for (const site of sites) {
+    if (assigned.has(site.id)) continue;
+    const clusterSites: Site[] = [site];
+    assigned.add(site.id);
+
+    for (const other of sites) {
+      if (other.id === site.id || assigned.has(other.id)) continue;
+      const d = Math.sqrt(
+        Math.pow(site.latitude - other.latitude, 2) +
+        Math.pow(site.longitude - other.longitude, 2)
+      );
+      if (d <= radius) {
+        clusterSites.push(other);
+        assigned.add(other.id);
+      }
+    }
+
+    if (clusterSites.length > 1) {
+      const avgLat = clusterSites.reduce((s, x) => s + x.latitude, 0) / clusterSites.length;
+      const avgLng = clusterSites.reduce((s, x) => s + x.longitude, 0) / clusterSites.length;
+      clusters.push({ sites: clusterSites, center: [avgLat, avgLng] });
+    }
+  }
+
+  const result: (Site | { type: "cluster"; sites: Site[]; center: [number, number]; id: string })[] = [];
+  const clusterIds = new Set<number>();
+
+  for (const c of clusters) {
+    for (const s of c.sites) clusterIds.add(s.id);
+    result.push({ type: "cluster", sites: c.sites, center: c.center, id: `cluster-${c.sites.map((s) => s.id).join("-")}` });
+  }
+
+  for (const site of sites) {
+    if (!clusterIds.has(site.id)) result.push(site);
+  }
+
+  return result;
+}
+
 function ZoomTracker({ onZoom }: { onZoom: (z: number) => void }) {
   useMapEvents({ zoomend: (e) => onZoom(e.target.getZoom()) });
+  return null;
+}
+
+function MapRef({ mapRef }: { mapRef: React.MutableRefObject<L.Map | null> }) {
+  const map = useMap();
+  mapRef.current = map;
   return null;
 }
 
@@ -135,6 +240,7 @@ export default function Explore() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showFeatured, setShowFeatured] = useState(false);
   const [zoom, setZoom] = useState(3);
+  const mapRef = useRef<L.Map | null>(null);
 
   const { data: sites = [], isLoading } = useListSites();
   const { data: regions = [] } = useListSitesByRegion();
@@ -214,16 +320,67 @@ export default function Explore() {
                 maxZoom={19}
               />
 
+              <MapRef mapRef={mapRef} />
               <ZoomTracker onZoom={setZoom} />
               <FlyToRegion region={selectedRegion} sites={filteredByRegion} />
 
-              {displayedSites.map((site) => {
+              {clusterSites(displayedSites as Site[], zoom).map((item) => {
+                if ("type" in item && item.type === "cluster") {
+                  const count = item.sites.length;
+                  const dominant = getCategoryMeta(item.sites[0].category);
+                  return (
+                    <Marker
+                      key={item.id}
+                      position={item.center}
+                      icon={makeClusterIcon(count, dominant.color)}
+                      eventHandlers={{
+                        click: () => {
+                          const map = mapRef.current;
+                          if (map) map.setView(item.center, Math.min(zoom + 3, 16), { animate: true, duration: 0.6 });
+                        },
+                      }}
+                    >
+                      <Tooltip
+                        direction="top"
+                        offset={[0, -8]}
+                        opacity={1}
+                        className="explore-tooltip"
+                      >
+                        <div className="text-center min-w-[160px]">
+                          <p className="font-semibold text-sm text-foreground leading-tight">{count} sites</p>
+                          <div className="mt-2 space-y-1 border-t border-border/50 pt-2">
+                            {item.sites.map((s) => {
+                              const m = getCategoryMeta(s.category);
+                              return (
+                                <button
+                                  key={s.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/site/${s.id}`);
+                                  }}
+                                  className="flex items-center gap-2 text-left w-full hover:bg-primary/10 rounded px-1 py-0.5 transition-colors"
+                                >
+                                  <span className="w-2 h-2 rounded-full" style={{ background: m.color }} />
+                                  <span className="text-xs text-foreground truncate">{s.name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1.5">Click to zoom in</p>
+                        </div>
+                      </Tooltip>
+                    </Marker>
+                  );
+                }
+
+                const site = item as Site;
                 const meta = getCategoryMeta(site.category);
+                const label = zoom >= 10 ? site.name : zoom >= 8 && site.isFeatured ? site.name : "";
                 return (
                   <Marker
                     key={site.id}
                     position={[site.latitude, site.longitude]}
-                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon)}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label)}
                     eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                   >
                     <Tooltip
