@@ -26,6 +26,8 @@ import {
   Moon,
   Sun,
   Users,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { GlobeErrorBoundary, isWebGLAvailable } from "@/components/GlobeErrorBoundary";
 import { useAuth } from "@/context/AuthContext";
@@ -511,6 +513,10 @@ export default function SiteDetail() {
   const [editSaving, setEditSaving] = useState(false);
   const [localSite, setLocalSite] = useState<any>(null);
 
+  // Admin 3D view lock
+  const [adminLockMode, setAdminLockMode] = useState(false);
+  const [lockSaving, setLockSaving] = useState(false);
+
   const { data: siteData, isLoading, error } = useGetSite(siteId, {
     query: { enabled: !!siteId, queryKey: ["getSite", siteId] },
   });
@@ -638,6 +644,78 @@ export default function SiteDetail() {
     setLocalHotspots((prev) => prev.filter((h) => h.id !== id));
     if (activeHotspot?.id === id) setActiveHotspot(null);
   };
+
+  const saveCameraLock = async () => {
+    const controls = orbitRef.current;
+    if (!controls) return;
+    setLockSaving(true);
+    const camera = controls.object;
+    const target = controls.target;
+    const pos = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+    const tgt = { x: target.x, y: target.y, z: target.z };
+    const res = await fetch(`/api/sites/${siteId}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cameraPosition: JSON.stringify(pos),
+        cameraTarget: JSON.stringify(tgt),
+        cameraLocked: true,
+      }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setLocalSite(updated);
+      setAdminLockMode(false);
+    }
+    setLockSaving(false);
+  };
+
+  const unlockCamera = async () => {
+    setLockSaving(true);
+    const res = await fetch(`/api/sites/${siteId}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cameraLocked: false,
+      }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setLocalSite(updated);
+    }
+    setLockSaving(false);
+  };
+
+  const isCameraLocked = (site as any).cameraLocked === true;
+  const lockedPosition = (() => {
+    try {
+      const p = (site as any).cameraPosition;
+      return p ? JSON.parse(p) : null;
+    } catch { return null; }
+  })();
+  const lockedTarget = (() => {
+    try {
+      const t = (site as any).cameraTarget;
+      return t ? JSON.parse(t) : null;
+    } catch { return null; }
+  })();
+
+  // Enforce locked camera position for non-admin users
+  useEffect(() => {
+    if (!isCameraLocked || !lockedPosition || user?.isAdmin) return;
+    const controls = orbitRef.current;
+    if (!controls) return;
+    const camera = controls.object;
+    if (camera) {
+      camera.position.set(lockedPosition.x, lockedPosition.y, lockedPosition.z);
+    }
+    if (lockedTarget) {
+      controls.target.set(lockedTarget.x, lockedTarget.y, lockedTarget.z);
+    }
+    controls.update();
+  }, [isCameraLocked, lockedPosition, lockedTarget, user?.isAdmin]);
 
   if (isLoading) {
     return (
@@ -783,7 +861,7 @@ export default function SiteDetail() {
                 <>
                   <div className="w-6 h-px bg-border" />
                   <button
-                    onClick={() => { setAnnotateMode(!annotateMode); setPendingPos(null); }}
+                    onClick={() => { setAnnotateMode(!annotateMode); setPendingPos(null); setAdminLockMode(false); }}
                     title="Add annotation"
                     className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
                       annotateMode
@@ -793,6 +871,38 @@ export default function SiteDetail() {
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
+                  {/* Admin lock view toggle */}
+                  <button
+                    onClick={() => {
+                      if (isCameraLocked) {
+                        unlockCamera();
+                      } else {
+                        setAdminLockMode(!adminLockMode);
+                        setAnnotateMode(false);
+                      }
+                    }}
+                    title={isCameraLocked ? "Unlock 3D view" : adminLockMode ? "Cancel lock mode" : "Lock 3D view"}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+                      isCameraLocked
+                        ? "bg-emerald-500 text-white border border-emerald-500/40"
+                        : adminLockMode
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                        : "text-muted-foreground hover:text-foreground hover:bg-card"
+                    }`}
+                  >
+                    {isCameraLocked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                  </button>
+                  {/* Admin lock save button */}
+                  {adminLockMode && (
+                    <button
+                      onClick={saveCameraLock}
+                      disabled={lockSaving}
+                      title="Save locked view"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500 text-white text-[10px] font-bold transition-all hover:bg-emerald-600"
+                    >
+                      {lockSaving ? "…" : "✓"}
+                    </button>
+                  )}
                 </>
               )}
             </div>
@@ -803,6 +913,16 @@ export default function SiteDetail() {
                 <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium" style={{ background: "#1a1200", border: "1px solid #c9a22760", color: "#c9a227" }}>
                   <Plus className="w-3 h-3" />
                   Click anywhere on the model to place a hotspot
+                </div>
+              </div>
+            )}
+
+            {/* Admin lock mode banner */}
+            {adminLockMode && (
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium" style={{ background: "#001a0d", border: "1px solid #10b98160", color: "#10b981" }}>
+                  <Lock className="w-3 h-3" />
+                  Position the camera, then click ✓ to lock the view
                 </div>
               </div>
             )}
@@ -894,10 +1014,10 @@ export default function SiteDetail() {
 
                       <OrbitControls
                         ref={orbitRef}
-                        enabled={!annotateMode}
-                        enableRotate={!annotateMode}
-                        enableZoom={!annotateMode}
-                        enablePan={!annotateMode}
+                        enabled={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
+                        enableRotate={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
+                        enableZoom={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
+                        enablePan={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                         minDistance={0.5}
                         maxDistance={500}
                       />
@@ -992,10 +1112,10 @@ export default function SiteDetail() {
 
                   <OrbitControls
                     ref={orbitRef}
-                    enabled={!annotateMode}
-                    enableRotate={!annotateMode}
-                    enableZoom={!annotateMode}
-                    enablePan={!annotateMode}
+                    enabled={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
+                    enableRotate={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
+                    enableZoom={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
+                    enablePan={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                     minDistance={0.5}
                     maxDistance={500}
                   />

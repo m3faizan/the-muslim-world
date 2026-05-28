@@ -26,6 +26,9 @@ export const sitesTable = pgTable("sites", {
   ramadanVisit: boolean("ramadan_visit").notNull().default(false),
   jumaPrayer: boolean("juma_prayer").notNull().default(false),
   sect: text("sect"),
+  cameraPosition: text("camera_position"),
+  cameraTarget: text("camera_target"),
+  cameraLocked: boolean("camera_locked").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

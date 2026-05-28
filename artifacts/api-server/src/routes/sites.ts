@@ -39,6 +39,9 @@ const UpdateSiteBody = z.object({
   ramadanVisit: z.boolean().optional(),
   jumaPrayer: z.boolean().optional(),
   sect: z.string().nullable().optional(),
+  cameraPosition: z.string().nullable().optional(),
+  cameraTarget: z.string().nullable().optional(),
+  cameraLocked: z.boolean().optional(),
 });
 
 const router = Router();
@@ -162,6 +165,9 @@ function formatSiteDetail(s: typeof sitesTable.$inferSelect) {
     areaSqm: s.areaSqm ?? null,
     dualUse: s.dualUse ?? null,
     sect: s.sect ?? null,
+    cameraPosition: s.cameraPosition ?? null,
+    cameraTarget: s.cameraTarget ?? null,
+    cameraLocked: s.cameraLocked,
   };
 }
 
