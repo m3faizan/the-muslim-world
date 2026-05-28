@@ -52,6 +52,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Masjid Ali bin Abi Talib": "",
   "Masjid Umar ibn Al-Khattab": "",
   "The Seven Mosques": "",
+  "Badr Battle Site": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
