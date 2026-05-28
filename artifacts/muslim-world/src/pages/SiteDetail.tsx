@@ -688,16 +688,16 @@ export default function SiteDetail() {
     setLockSaving(false);
   };
 
-  const isCameraLocked = (site as any).cameraLocked === true;
+  const isCameraLocked = site ? (site as any).cameraLocked === true : false;
   const lockedPosition = (() => {
     try {
-      const p = (site as any).cameraPosition;
+      const p = site ? (site as any).cameraPosition : null;
       return p ? JSON.parse(p) : null;
     } catch { return null; }
   })();
   const lockedTarget = (() => {
     try {
-      const t = (site as any).cameraTarget;
+      const t = site ? (site as any).cameraTarget : null;
       return t ? JSON.parse(t) : null;
     } catch { return null; }
   })();
