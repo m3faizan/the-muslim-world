@@ -54,8 +54,8 @@ function getCategoryMeta(raw: string) {
 
 const iconCache: Record<string, L.DivIcon> = {};
 
-function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkIcon = false, label = "", labelAngle: number = 0, labelDist: number = 30) {
-  const key = `${iconUrl}-${color}-${featured}-${darkIcon}-${label}-${labelAngle.toFixed(1)}-${labelDist}`;
+function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkIcon = false, label = "") {
+  const key = `${iconUrl}-${color}-${featured}-${darkIcon}-${label}`;
   if (iconCache[key]) return iconCache[key];
 
   const size = 22;
@@ -64,16 +64,12 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
   const imgFilter = darkIcon ? "brightness(0)" : "brightness(0) invert(1)";
   const border = darkIcon ? "2px solid rgba(0,0,0,0.25)" : "2px solid rgba(255,255,255,0.35)";
 
-  // Convert angle (degrees) to radians and compute offset
-  const rad = (labelAngle * Math.PI) / 180;
-  const dx = Math.cos(rad) * labelDist;
-  const dy = Math.sin(rad) * labelDist;
-
   const labelHtml = label
     ? `<div style="
         position:absolute;
-        top:50%;left:50%;
-        transform:translate(${dx}px, ${dy}px) translate(-50%, -50%);
+        top:${size + 4}px;
+        left:50%;
+        transform:translateX(-50%);
         white-space:nowrap;
         color:#ffffff;
         font-size:11px;
@@ -81,10 +77,6 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
         font-family:'IBM Plex Mono',monospace;
         text-shadow:0 1px 4px rgba(0,0,0,0.9),0 0 8px rgba(0,0,0,0.8);
         pointer-events:none;
-        padding:2px 8px;
-        background:rgba(0,0,0,0.35);
-        border-radius:4px;
-        line-height:1;
       ">${label}</div>`
     : "";
 
@@ -225,16 +217,14 @@ export default function Explore() {
               <ZoomTracker onZoom={setZoom} />
               <FlyToRegion region={selectedRegion} sites={filteredByRegion} />
 
-              {displayedSites.map((site, index) => {
+              {displayedSites.map((site) => {
                 const meta = getCategoryMeta(site.category);
-                const label = zoom >= 8 ? site.name : zoom >= 6 && site.isFeatured ? site.name : "";
-                const labelAngle = label ? ((index * 45) % 360) : 0;
-                const labelDist = label ? (28 + Math.floor(index / 8) * 30) : 30;
+                const label = zoom >= 9 ? site.name : zoom >= 7 && site.isFeatured ? site.name : "";
                 return (
                   <Marker
                     key={site.id}
                     position={[site.latitude, site.longitude]}
-                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label, labelAngle, labelDist)}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label)}
                     eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                   >
                     <Tooltip
