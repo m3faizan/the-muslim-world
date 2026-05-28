@@ -51,6 +51,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Masjid Abu Bakr As-Siddiq": "",
   "Masjid Ali bin Abi Talib": "",
   "Masjid Umar ibn Al-Khattab": "",
+  "The Seven Mosques": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
