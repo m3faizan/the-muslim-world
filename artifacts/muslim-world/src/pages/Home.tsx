@@ -41,7 +41,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Mount Thawr": "/site-images/mount-thawr.png",
   "Mount Hira": "/site-images/mount-hira.png",
   "Ghars Well": "",
-  "Mount Uhud": "",
+  "Mount Uhud": "/site-images/uhud-mountain.jpg",
   "Masjid Ayesha": "",
   "Miqat Yalamlam": "",
   "Miqat Dhat Irq": "",

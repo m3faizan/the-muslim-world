@@ -31,7 +31,8 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
+    // runtimeErrorOverlay() disabled — sandboxed environments have no WebGL
+    // and the overlay obscures the UI; WebGL fallbacks are handled in code
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [

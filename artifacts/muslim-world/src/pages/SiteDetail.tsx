@@ -14,6 +14,7 @@ import {
   X,
   Info,
   Box,
+  Image,
   RotateCcw,
   Star,
   CheckCircle2,
@@ -26,7 +27,7 @@ import {
   Sun,
   Users,
 } from "lucide-react";
-import { GlobeErrorBoundary } from "@/components/GlobeErrorBoundary";
+import { GlobeErrorBoundary, isWebGLAvailable } from "@/components/GlobeErrorBoundary";
 import { useAuth } from "@/context/AuthContext";
 import { useCollection } from "@/context/CollectionContext";
 
@@ -483,7 +484,15 @@ export default function SiteDetail() {
   const { collectedIds, toggle: toggleCollection } = useCollection();
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [viewMode, setViewMode] = useState<"model" | "photo">("model");
+  const [hasWebGL, setHasWebGL] = useState(true);
   const orbitRef = useRef<any>(null);
+
+  useEffect(() => {
+    const available = isWebGLAvailable();
+    setHasWebGL(available);
+    if (!available) setViewMode("photo");
+  }, []);
 
   // Visited / prayed tracking
   const [siteLog, setSiteLog] = useState<{ visited: boolean; prayed: boolean } | null>(null);
@@ -798,7 +807,7 @@ export default function SiteDetail() {
               </div>
             )}
 
-            {/* 3D Viewer — image for photo-only sites, USDZ AR for iOS, R3F Canvas for GLB */}
+            {/* 3D Viewer — photo-only, USDZ AR, R3F Canvas, or model+photo toggle */}
             {!site.modelUrl && site.imageUrl ? (
               <div className="w-full h-full flex items-center justify-center bg-card relative overflow-hidden">
                 <img
@@ -816,6 +825,111 @@ export default function SiteDetail() {
               </div>
             ) : site.modelUrl && site.modelUrl.endsWith(".usdz") ? (
               <UsdzFallback src={site.modelUrl} name={site.name} />
+            ) : site.modelUrl && site.imageUrl ? (
+              <>
+                {/* ── Model / Photo toggle ── */}
+                {viewMode === "photo" ? (
+                  <div className="w-full h-full flex items-center justify-center bg-card relative overflow-hidden">
+                    <img
+                      src={site.imageUrl}
+                      alt={site.name}
+                      className="w-full h-full object-cover"
+                      style={{ objectPosition: "center" }}
+                    />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 px-4 py-3"
+                      style={{ background: "linear-gradient(to top, rgba(5,8,12,0.9) 0%, rgba(5,8,12,0.4) 60%, transparent 100%)" }}
+                    >
+                      <p className="text-xs text-muted-foreground font-mono">Photo of {site.name}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <GlobeErrorBoundary
+                    fallback={
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-center bg-card">
+                        <Box className="w-12 h-12 text-primary/30" />
+                        <p className="text-foreground font-medium">3D view unavailable</p>
+                        <p className="text-muted-foreground text-sm max-w-xs">
+                          Your browser does not support WebGL. Explore the site details in the panel on the right.
+                        </p>
+                      </div>
+                    }
+                  >
+                    <Canvas
+                      shadows
+                      camera={{ fov: 45 }}
+                      gl={{ antialias: true }}
+                    >
+                      <color attach="background" args={["#0d1117"]} />
+                      <ambientLight intensity={0.6} />
+                      <directionalLight position={[5, 8, 5]} intensity={1.2} castShadow />
+                      <directionalLight position={[-4, 3, -4]} intensity={0.3} color="#d4af37" />
+                      <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
+
+                      <Suspense fallback={null}>
+                        <Bounds fit clip observe margin={1.3}>
+                          {site.modelUrl.endsWith(".obj") ? (
+                            <ObjMesh
+                              url={site.modelUrl}
+                              hotspots={hotspots}
+                              onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                              activeHotspot={activeHotspot}
+                              annotateMode={annotateMode}
+                              onAnnotate={(pos) => setPendingPos(pos)}
+                              onClose={() => setActiveHotspot(null)}
+                            />
+                          ) : (
+                            <GltfMesh
+                              url={site.modelUrl}
+                              hotspots={hotspots}
+                              onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                              activeHotspot={activeHotspot}
+                              annotateMode={annotateMode}
+                              onAnnotate={(pos) => setPendingPos(pos)}
+                              onClose={() => setActiveHotspot(null)}
+                            />
+                          )}
+                        </Bounds>
+                      </Suspense>
+
+                      <OrbitControls
+                        ref={orbitRef}
+                        enabled={!annotateMode}
+                        enableRotate={!annotateMode}
+                        enableZoom={!annotateMode}
+                        enablePan={!annotateMode}
+                        minDistance={0.5}
+                        maxDistance={500}
+                      />
+                    </Canvas>
+                  </GlobeErrorBoundary>
+                )}
+                {/* ── View-mode toggle bar ── */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 p-1 rounded-xl border border-border/70 bg-background/95 backdrop-blur-md shadow-lg">
+                  <button
+                    onClick={() => setViewMode("model")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      viewMode === "model"
+                        ? "bg-primary/15 text-primary border border-primary/30"
+                        : "text-muted-foreground hover:text-foreground hover:bg-card"
+                    }`}
+                  >
+                    <Box className="w-3.5 h-3.5" />
+                    3D Model
+                  </button>
+                  <button
+                    onClick={() => setViewMode("photo")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      viewMode === "photo"
+                        ? "bg-primary/15 text-primary border border-primary/30"
+                        : "text-muted-foreground hover:text-foreground hover:bg-card"
+                    }`}
+                  >
+                    <Image className="w-3.5 h-3.5" />
+                    Photo
+                  </button>
+                </div>
+              </>
             ) : (
               <GlobeErrorBoundary
                 fallback={
