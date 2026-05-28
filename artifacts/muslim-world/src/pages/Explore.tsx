@@ -54,8 +54,8 @@ function getCategoryMeta(raw: string) {
 
 const iconCache: Record<string, L.DivIcon> = {};
 
-function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkIcon = false, label = "") {
-  const key = `${iconUrl}-${color}-${featured}-${darkIcon}-${label}`;
+function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkIcon = false, label = "", labelPos: "top" | "bottom" | "left" | "right" = "bottom") {
+  const key = `${iconUrl}-${color}-${featured}-${darkIcon}-${label}-${labelPos}`;
   if (iconCache[key]) return iconCache[key];
 
   const size = 22;
@@ -64,12 +64,19 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
   const imgFilter = darkIcon ? "brightness(0)" : "brightness(0) invert(1)";
   const border = darkIcon ? "2px solid rgba(0,0,0,0.25)" : "2px solid rgba(255,255,255,0.35)";
 
+  const pos = labelPos;
+  const labelStyle = pos === "top"
+    ? `bottom:${size + 4}px;left:50%;transform:translateX(-50%);`
+    : pos === "bottom"
+    ? `top:${size + 4}px;left:50%;transform:translateX(-50%);`
+    : pos === "left"
+    ? `top:50%;right:${size + 4}px;transform:translateY(-50%);text-align:right;`
+    : `top:50%;left:${size + 4}px;transform:translateY(-50%);text-align:left;`;
+
   const labelHtml = label
     ? `<div style="
         position:absolute;
-        top:${size + 18}px;
-        left:50%;
-        transform:translateX(-50%);
+        ${labelStyle}
         white-space:nowrap;
         color:#ffffff;
         font-size:11px;
@@ -81,8 +88,7 @@ function makeMarkerIcon(iconUrl: string, color: string, featured: boolean, darkI
         background:rgba(0,0,0,0.35);
         border-radius:4px;
         line-height:1;
-      ">${label}</div>
-      <div style="position:absolute;top:${size}px;left:50%;transform:translateX(-50%);width:1px;height:16px;background:rgba(255,255,255,0.6);pointer-events:none;"></div>`
+      ">${label}</div>`
     : "";
 
   const icon = L.divIcon({
@@ -222,14 +228,16 @@ export default function Explore() {
               <ZoomTracker onZoom={setZoom} />
               <FlyToRegion region={selectedRegion} sites={filteredByRegion} />
 
-              {displayedSites.map((site) => {
+              {displayedSites.map((site, index) => {
                 const meta = getCategoryMeta(site.category);
-                const label = zoom >= 9 ? site.name : zoom >= 7 && site.isFeatured ? site.name : "";
+                const label = zoom >= 3 ? site.name : "";
+                const positions: Array<"top" | "bottom" | "left" | "right"> = ["bottom", "top", "left", "right"];
+                const labelPos = label ? positions[index % positions.length] : "bottom";
                 return (
                   <Marker
                     key={site.id}
                     position={[site.latitude, site.longitude]}
-                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label)}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label, labelPos)}
                     eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                   >
                     <Tooltip
