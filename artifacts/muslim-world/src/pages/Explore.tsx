@@ -219,12 +219,11 @@ export default function Explore() {
 
               {displayedSites.map((site) => {
                 const meta = getCategoryMeta(site.category);
-                const label = zoom >= 9 ? site.name : zoom >= 7 && site.isFeatured ? site.name : "";
                 return (
                   <Marker
                     key={site.id}
                     position={[site.latitude, site.longitude]}
-                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label)}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon)}
                     eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                   >
                     <Tooltip
