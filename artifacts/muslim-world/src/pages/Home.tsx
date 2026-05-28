@@ -48,6 +48,9 @@ const SITE_PHOTOS: Record<string, string> = {
   "Al Fuqayr Well": "",
   "Bani Unaif Mosque": "",
   "Masjid Ghamama": "",
+  "Masjid Abu Bakr As-Siddiq": "",
+  "Masjid Ali bin Abi Talib": "",
+  "Masjid Umar ibn Al-Khattab": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
