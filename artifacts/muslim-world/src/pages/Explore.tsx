@@ -5,9 +5,6 @@ import { MapPin, Map, ChevronRight, Star, Layers, PanelRightClose, PanelRightOpe
 import { MapContainer, TileLayer, Marker, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import MarkerClusterGroup from "react-leaflet-cluster";
 
 import mosqueIconUrl from "@assets/mosque_1779811630170.png";
 import othersIconUrl from "@assets/Others_1779811630171.png";
@@ -140,7 +137,6 @@ export default function Explore() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showFeatured, setShowFeatured] = useState(false);
   const [zoom, setZoom] = useState(3);
-  const [labelsOn, setLabelsOn] = useState(true);
 
   const { data: sites = [], isLoading } = useListSites();
   const { data: regions = [] } = useListSitesByRegion();
@@ -162,21 +158,6 @@ export default function Explore() {
     );
   }
 
-  // Label logic:
-  // - The three holiest sites (Haram, Nabawi, Aqsa) always show labels when enabled
-  // - Zoom 0–6: no other labels (global view is too crowded)
-  // - Zoom 7–9: only featured/important sites get labels
-  // - Zoom 10+: all sites get labels
-  // - Toggle button can turn all labels off
-  const HOLIEST_SITE_IDS = new Set([1, 2, 3]); // Masjid Al-Haram, Masjid An-Nabawi, Masjid Al-Aqsa
-  function shouldShowLabel(site: Site): boolean {
-    if (!labelsOn) return false;
-    // The three holiest sites always show labels when labels are enabled
-    if (HOLIEST_SITE_IDS.has(site.id)) return true;
-    if (zoom >= 10) return true;
-    if (zoom >= 7 && site.isFeatured) return true;
-    return false;
-  }
 
   return (
     <div className="flex flex-col h-screen w-screen bg-background overflow-hidden">
@@ -197,17 +178,6 @@ export default function Explore() {
             <Map className="w-3 h-3 text-primary" />
             <span>{displayedSites.length} sites</span>
           </div>
-          <button
-            onClick={() => setLabelsOn(!labelsOn)}
-            title={labelsOn ? "Hide labels" : "Show labels"}
-            className={`p-2 rounded-lg border transition-colors ${
-              labelsOn
-                ? "bg-primary/10 border-primary/40 text-primary"
-                : "bg-card border-border text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Type className="w-4 h-4" />
-          </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             title={sidebarOpen ? "Hide panel" : "Show panel"}
@@ -252,43 +222,34 @@ export default function Explore() {
               <ZoomTracker onZoom={setZoom} />
               <FlyToRegion region={selectedRegion} sites={filteredByRegion} />
 
-              <MarkerClusterGroup
-                chunkedLoading
-                maxClusterRadius={60}
-                spiderfyOnMaxZoom={false}
-                showCoverageOnHover={false}
-                zoomToBoundsOnClick={true}
-                disableClusteringAtZoom={12}
-              >
-                {displayedSites.map((site) => {
-                  const meta = getCategoryMeta(site.category);
-                  return (
-                    <Marker
-                      key={site.id}
-                      position={[site.latitude, site.longitude]}
-                      icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon)}
-                      eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
+              {displayedSites.map((site) => {
+                const meta = getCategoryMeta(site.category);
+                return (
+                  <Marker
+                    key={site.id}
+                    position={[site.latitude, site.longitude]}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon)}
+                    eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
+                  >
+                    <Tooltip
+                      direction="top"
+                      offset={[0, -8]}
+                      opacity={1}
+                      className="explore-tooltip"
                     >
-                      <Tooltip
-                        direction="top"
-                        offset={[0, -8]}
-                        opacity={1}
-                        className="explore-tooltip"
-                      >
-                        <div className="text-center min-w-[120px]">
-                          <p className="font-semibold text-sm text-foreground leading-tight">{site.name}</p>
-                          <p className="font-arabic text-xs text-primary/70 mt-0.5" dir="rtl">{site.arabicName}</p>
-                          <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
-                            <MapPin className="w-3 h-3" />
-                            <span>{site.country}</span>
-                          </div>
-                          <p className="text-xs text-primary/80 mt-1">Click to explore →</p>
+                      <div className="text-center min-w-[120px]">
+                        <p className="font-semibold text-sm text-foreground leading-tight">{site.name}</p>
+                        <p className="font-arabic text-xs text-primary/70 mt-0.5" dir="rtl">{site.arabicName}</p>
+                        <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
+                          <MapPin className="w-3 h-3" />
+                          <span>{site.country}</span>
                         </div>
-                      </Tooltip>
-                    </Marker>
-                  );
-                })}
-              </MarkerClusterGroup>
+                        <p className="text-xs text-primary/80 mt-1">Click to explore →</p>
+                      </div>
+                    </Tooltip>
+                  </Marker>
+                );
+              })}
             </MapContainer>
           )}
 
