@@ -6,3 +6,21 @@ id = "NFEA0j3cAF29l5YA-clb2"
 uri = "file://artifacts/muslim-world/public/site-images/masjid-al-fash.png"
 type = "image"
 title = "masjid al fash uhud"
+
+[[generated]]
+id = "VQ_u4szfU8xu2iaE9tUwm"
+uri = "file://artifacts/muslim-world/public/site-images/masjid-al-farooq.png"
+type = "image"
+title = "Masjid Al Farooq exterior"
+
+[[generated]]
+id = "sEnyKJ5b1SAjylwRs7MO8"
+uri = "file://artifacts/muslim-world/public/site-images/jamia-masjid-copper.png"
+type = "image"
+title = "Jamia Masjid Copper Mosque exterior"
+
+[[generated]]
+id = "CmXs1wuuM3rwaNRnhLaXm"
+uri = "file://artifacts/muslim-world/public/site-images/isna-mosque.png"
+type = "image"
+title = "ISNA Mosque exterior"

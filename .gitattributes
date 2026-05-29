@@ -20,3 +20,9 @@ artifacts/muslim-world/public/models/masjid-ayesha.glb filter=lfs diff=lfs merge
 attached_assets/Masjid_Ayesha_1779923525011.glb filter=lfs diff=lfs merge=lfs -text
 artifacts/muslim-world/public/models/al-fuqayr-well.glb filter=lfs diff=lfs merge=lfs -text
 attached_assets/Al_Fuqayr_Well_1779923934309.glb filter=lfs diff=lfs merge=lfs -text
+artifacts/muslim-world/public/models/isna-mosque.glb filter=lfs diff=lfs merge=lfs -text
+artifacts/muslim-world/public/models/jamia-masjid-copper.glb filter=lfs diff=lfs merge=lfs -text
+artifacts/muslim-world/public/models/masjid-al-farooq.glb filter=lfs diff=lfs merge=lfs -text
+attached_assets/ISNA_Moque_Mississauga_1780064959501.glb filter=lfs diff=lfs merge=lfs -text
+attached_assets/Jamia_Masjid_Mississauga_1780064959505.glb filter=lfs diff=lfs merge=lfs -text
+attached_assets/masjid_al_farooq_1780064959506.glb filter=lfs diff=lfs merge=lfs -text

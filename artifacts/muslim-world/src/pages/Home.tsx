@@ -55,6 +55,9 @@ const SITE_PHOTOS: Record<string, string> = {
   "Badr Battle Site": "",
   "Jabal Ayr": "",
   "Masjid Al Fash": "/site-images/masjid-al-fash.png",
+  "Masjid Al Farooq": "/site-images/masjid-al-farooq.png",
+  "Jamia Masjid - Copper Mosque": "/site-images/jamia-masjid-copper.png",
+  "ISNA Mosque": "/site-images/isna-mosque.png",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
