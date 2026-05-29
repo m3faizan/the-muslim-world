@@ -59,6 +59,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "ISNA Mosque": "",
   "Sultan Qaboos Mosque": "",
   "Masjid Al Farooq": "",
+  "Salman Al Farsi Mosque": "",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
