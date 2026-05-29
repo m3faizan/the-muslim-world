@@ -5,6 +5,9 @@ import { MapPin, Map, ChevronRight, Star, Layers, PanelRightClose, PanelRightOpe
 import { MapContainer, TileLayer, Marker, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import MarkerClusterGroup from "react-leaflet-cluster";
 
 import mosqueIconUrl from "@assets/mosque_1779811630170.png";
 import othersIconUrl from "@assets/Others_1779811630171.png";
@@ -249,35 +252,43 @@ export default function Explore() {
               <ZoomTracker onZoom={setZoom} />
               <FlyToRegion region={selectedRegion} sites={filteredByRegion} />
 
-              {displayedSites.map((site) => {
-                const meta = getCategoryMeta(site.category);
-                const label = shouldShowLabel(site) ? site.name : "";
-                return (
-                  <Marker
-                    key={site.id}
-                    position={[site.latitude, site.longitude]}
-                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label)}
-                    eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
-                  >
-                    <Tooltip
-                      direction="top"
-                      offset={[0, -8]}
-                      opacity={1}
-                      className="explore-tooltip"
+              <MarkerClusterGroup
+                chunkedLoading
+                maxClusterRadius={60}
+                spiderfyOnMaxZoom={false}
+                showCoverageOnHover={false}
+                zoomToBoundsOnClick={true}
+                disableClusteringAtZoom={12}
+              >
+                {displayedSites.map((site) => {
+                  const meta = getCategoryMeta(site.category);
+                  return (
+                    <Marker
+                      key={site.id}
+                      position={[site.latitude, site.longitude]}
+                      icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon)}
+                      eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                     >
-                      <div className="text-center min-w-[120px]">
-                        <p className="font-semibold text-sm text-foreground leading-tight">{site.name}</p>
-                        <p className="font-arabic text-xs text-primary/70 mt-0.5" dir="rtl">{site.arabicName}</p>
-                        <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
-                          <MapPin className="w-3 h-3" />
-                          <span>{site.country}</span>
+                      <Tooltip
+                        direction="top"
+                        offset={[0, -8]}
+                        opacity={1}
+                        className="explore-tooltip"
+                      >
+                        <div className="text-center min-w-[120px]">
+                          <p className="font-semibold text-sm text-foreground leading-tight">{site.name}</p>
+                          <p className="font-arabic text-xs text-primary/70 mt-0.5" dir="rtl">{site.arabicName}</p>
+                          <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>{site.country}</span>
+                          </div>
+                          <p className="text-xs text-primary/80 mt-1">Click to explore →</p>
                         </div>
-                        <p className="text-xs text-primary/80 mt-1">Click to explore →</p>
-                      </div>
-                    </Tooltip>
-                  </Marker>
-                );
-              })}
+                      </Tooltip>
+                    </Marker>
+                  );
+                })}
+              </MarkerClusterGroup>
             </MapContainer>
           )}
 
