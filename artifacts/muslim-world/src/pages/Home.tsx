@@ -60,6 +60,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Sultan Qaboos Mosque": "",
   "Masjid Al Farooq": "",
   "Salman Al Farsi Mosque": "",
+  "Uhud Martyrs Square": "/site-images/uhud-martyrs-square.png",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
