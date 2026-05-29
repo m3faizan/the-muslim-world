@@ -24,3 +24,9 @@ id = "CmXs1wuuM3rwaNRnhLaXm"
 uri = "file://artifacts/muslim-world/public/site-images/isna-mosque.png"
 type = "image"
 title = "ISNA Mosque exterior"
+
+[[generated]]
+id = "SQJKHVJ_gUuFsBBVeNOEp"
+uri = "file://artifacts/muslim-world/public/site-images/sultan-qaboos-grand-mosque.png"
+type = "image"
+title = "Sultan Qaboos Grand Mosque exterior"
