@@ -67,7 +67,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   palace: "#9b7dc8",
   fortress: "#c87840",
   city: "#5a8fc4",
-  Mosque: "#39b163",
+  Mosque: "#90EE90",
   Shrine: "#3bb5a0",
   Miqat: "#d4962a",
   "Pilgrimage Site": "#c84040",

@@ -30,7 +30,7 @@ type Site = {
 
 const CATEGORIES = [
   { label: "Holy Sites",      icon: mosqueIconUrl,      color: "#FFD700", darkIcon: false, prominent: true },
-  { label: "Mosque",          icon: mosqueIconUrl,      color: "#d4af37", darkIcon: false },
+  { label: "Mosque",          icon: mosqueIconUrl,      color: "#90EE90", darkIcon: false },
   { label: "Shrine",          icon: shrineIconUrl,      color: "#40bea5", darkIcon: false },
   { label: "Palace",          icon: palaceIconUrl,      color: "#b478dc", darkIcon: false },
   { label: "Pilgrimage Site", icon: pilgrimageIconUrl,  color: "#f4a7c3", darkIcon: true  },
