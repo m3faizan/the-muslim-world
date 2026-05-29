@@ -61,6 +61,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Masjid Al Farooq": "",
   "Salman Al Farsi Mosque": "",
   "Uhud Martyrs Square": "/site-images/uhud-martyrs-square.png",
+  "Uhud Battle Site": "/site-images/uhud-battle-site.png",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
