@@ -137,6 +137,7 @@ export default function Explore() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showFeatured, setShowFeatured] = useState(false);
   const [zoom, setZoom] = useState(3);
+  const [labelsOn, setLabelsOn] = useState(true);
 
   const { data: sites = [], isLoading } = useListSites();
   const { data: regions = [] } = useListSitesByRegion();
@@ -158,6 +159,21 @@ export default function Explore() {
     );
   }
 
+  // Label logic:
+  // - The three holiest sites (Haram, Nabawi, Aqsa) always show labels when enabled
+  // - Zoom 0–6: no other labels (global view is too crowded)
+  // - Zoom 7–9: only featured/important sites get labels
+  // - Zoom 10+: all sites get labels
+  // - Toggle button can turn all labels off
+  const HOLIEST_SITE_IDS = new Set([1, 2, 3]); // Masjid Al-Haram, Masjid An-Nabawi, Masjid Al-Aqsa
+  function shouldShowLabel(site: Site): boolean {
+    if (!labelsOn) return false;
+    // The three holiest sites always show labels when labels are enabled
+    if (HOLIEST_SITE_IDS.has(site.id)) return true;
+    if (zoom >= 10) return true;
+    if (zoom >= 7 && site.isFeatured) return true;
+    return false;
+  }
 
   return (
     <div className="flex flex-col h-screen w-screen bg-background overflow-hidden">
@@ -178,6 +194,17 @@ export default function Explore() {
             <Map className="w-3 h-3 text-primary" />
             <span>{displayedSites.length} sites</span>
           </div>
+          <button
+            onClick={() => setLabelsOn(!labelsOn)}
+            title={labelsOn ? "Hide labels" : "Show labels"}
+            className={`p-2 rounded-lg border transition-colors ${
+              labelsOn
+                ? "bg-primary/10 border-primary/40 text-primary"
+                : "bg-card border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Type className="w-4 h-4" />
+          </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             title={sidebarOpen ? "Hide panel" : "Show panel"}
@@ -224,11 +251,12 @@ export default function Explore() {
 
               {displayedSites.map((site) => {
                 const meta = getCategoryMeta(site.category);
+                const label = shouldShowLabel(site) ? site.name : "";
                 return (
                   <Marker
                     key={site.id}
                     position={[site.latitude, site.longitude]}
-                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon)}
+                    icon={makeMarkerIcon(meta.icon, meta.color, site.isFeatured, meta.darkIcon, label)}
                     eventHandlers={{ click: () => navigate(`/site/${site.id}`) }}
                   >
                     <Tooltip
