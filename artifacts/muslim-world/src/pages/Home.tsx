@@ -58,7 +58,7 @@ const SITE_PHOTOS: Record<string, string> = {
   "Masjid Al Farooq": "/site-images/masjid-al-farooq.png",
   "Jamia Masjid - Copper Mosque": "/site-images/jamia-masjid-copper.png",
   "ISNA Mosque": "/site-images/isna-mosque.png",
-  "Sultan Qaboos Grand Mosque": "/site-images/sultan-qaboos-grand-mosque.png",
+  "Sultan Qaboos Mosque": "/site-images/sultan-qaboos-mosque.png",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
