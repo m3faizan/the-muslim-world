@@ -29,6 +29,7 @@ type Site = {
 };
 
 const CATEGORIES = [
+  { label: "Holy Sites",      icon: mosqueIconUrl,      color: "#FFD700", darkIcon: false, prominent: true },
   { label: "Mosque",          icon: mosqueIconUrl,      color: "#d4af37", darkIcon: false },
   { label: "Shrine",          icon: shrineIconUrl,      color: "#40bea5", darkIcon: false },
   { label: "Palace",          icon: palaceIconUrl,      color: "#b478dc", darkIcon: false },
@@ -40,6 +41,7 @@ type CategoryLabel = (typeof CATEGORIES)[number]["label"];
 
 function normalizeCategory(raw: string): CategoryLabel {
   const c = raw.toLowerCase().trim();
+  if (c === "holy" || c === "holy site" || c === "holy sites") return "Holy Sites";
   if (c === "mosque")                             return "Mosque";
   if (c === "shrine")                             return "Shrine";
   if (c === "palace")                             return "Palace";
@@ -49,7 +51,7 @@ function normalizeCategory(raw: string): CategoryLabel {
 
 function getCategoryMeta(raw: string) {
   const label = normalizeCategory(raw);
-  return CATEGORIES.find((c) => c.label === label) ?? CATEGORIES[4];
+  return CATEGORIES.find((c) => c.label === label) ?? CATEGORIES[CATEGORIES.length - 1];
 }
 
 const iconCache: Record<string, L.DivIcon> = {};
@@ -131,7 +133,7 @@ function FlyToRegion({ region, sites }: { region: string | null; sites: Site[] }
 export default function Explore() {
   const [, navigate] = useLocation();
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryLabel | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryLabel[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showFeatured, setShowFeatured] = useState(false);
   const [zoom, setZoom] = useState(3);
@@ -147,12 +149,14 @@ export default function Explore() {
 
   const regionOrFeatured = showFeatured ? (featuredSites as Site[]) : filteredByRegion;
 
-  const displayedSites = selectedCategory
-    ? regionOrFeatured.filter((s) => normalizeCategory(s.category) === selectedCategory)
+  const displayedSites = selectedCategories.length > 0
+    ? regionOrFeatured.filter((s) => selectedCategories.includes(normalizeCategory(s.category)))
     : regionOrFeatured;
 
   function toggleCategory(label: CategoryLabel) {
-    setSelectedCategory((prev) => (prev === label ? null : label));
+    setSelectedCategories((prev) =>
+      prev.includes(label) ? prev.filter((c) => c !== label) : [...prev, label]
+    );
   }
 
   // Label logic:
@@ -309,9 +313,9 @@ export default function Explore() {
             <div className="p-3 border-b border-border flex-shrink-0 space-y-2">
               <div className="flex gap-2">
                 <button
-                  onClick={() => { setShowFeatured(false); setSelectedRegion(null); setSelectedCategory(null); }}
+                  onClick={() => { setShowFeatured(false); setSelectedRegion(null); setSelectedCategories([]); }}
                   className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
-                    !showFeatured && !selectedRegion && !selectedCategory
+                    !showFeatured && !selectedRegion && selectedCategories.length === 0
                       ? "bg-primary text-primary-foreground border-primary"
                       : "border-border text-muted-foreground hover:text-foreground"
                   }`}
@@ -319,7 +323,7 @@ export default function Explore() {
                   All Sites
                 </button>
                 <button
-                  onClick={() => { setShowFeatured(true); setSelectedRegion(null); setSelectedCategory(null); }}
+                  onClick={() => { setShowFeatured(true); setSelectedRegion(null); setSelectedCategories([]); }}
                   className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors flex items-center justify-center gap-1 ${
                     showFeatured
                       ? "bg-primary text-primary-foreground border-primary"
@@ -370,13 +374,13 @@ export default function Explore() {
               })}
             </div>
 
-            {/* Legend — clickable category filter */}
+            {/* Legend — multi-select category filter */}
             <div className="p-3.5 border-t border-border flex-shrink-0">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-medium text-muted-foreground">Legend</p>
-                {selectedCategory && (
+                {selectedCategories.length > 0 && (
                   <button
-                    onClick={() => setSelectedCategory(null)}
+                    onClick={() => setSelectedCategories([])}
                     className="text-[10px] text-primary hover:underline"
                   >
                     Clear filter
@@ -384,8 +388,8 @@ export default function Explore() {
                 )}
               </div>
               <div className="grid grid-cols-1 gap-1">
-                {CATEGORIES.map(({ label, icon, color, darkIcon }) => {
-                  const active = selectedCategory === label;
+                {CATEGORIES.map(({ label, icon, color, darkIcon, prominent }) => {
+                  const active = selectedCategories.includes(label);
                   return (
                     <button
                       key={label}
@@ -394,23 +398,23 @@ export default function Explore() {
                         active
                           ? "bg-card border border-border/80 ring-1 ring-offset-0"
                           : "hover:bg-card/50 border border-transparent"
-                      }`}
+                      } ${prominent ? "font-bold" : ""}`}
                       style={active ? { ringColor: color } : {}}
                       title={`Filter by ${label}`}
                     >
                       <div
-                        className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center"
+                        className={`rounded-full flex-shrink-0 flex items-center justify-center ${prominent ? "w-7 h-7" : "w-6 h-6"}`}
                         style={{ backgroundColor: color, border: darkIcon ? "1px solid rgba(0,0,0,0.2)" : undefined }}
                       >
                         <img
                           src={icon}
                           alt={label}
-                          className="w-3.5 h-3.5 object-contain"
+                          className={`object-contain ${prominent ? "w-4 h-4" : "w-3.5 h-3.5"}`}
                           style={{ filter: darkIcon ? "brightness(0)" : "brightness(0) invert(1)" }}
                         />
                       </div>
                       <span
-                        className="text-xs transition-colors"
+                        className={`text-xs transition-colors ${prominent ? "text-[13px] font-bold" : ""}`}
                         style={{ color: active ? color : undefined }}
                       >
                         {label}

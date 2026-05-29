@@ -73,6 +73,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   "Pilgrimage Site": "#c84040",
   others: "#6ea8fe",
   Others: "#6ea8fe",
+  holy: "#FFD700",
+  "Holy Sites": "#FFD700",
 };
 
 const HISTORY: { year: string; event: string; loc: string }[] = [
