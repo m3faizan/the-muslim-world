@@ -1,0 +1,54 @@
+{
+  "summary": "Full backend + frontend testing of The Muslim World migration (Express+Postgres -> FastAPI+MongoDB). All 25 pytest backend tests PASS (100%). Frontend Home, Explore (Leaflet map with 52 markers), Site detail (/site/1 shows Masjid Al-Haram, Arabic, 3 hotspots, 3D canvas), Auth (admin login OK -> JWT stored in localStorage key 'muslim_world_token', Admin badge shown in nav), Tracker (52 sites with Mark visited/Mark prayed buttons), and Collection (shows saved sites) all work correctly. One minor frontend issue: /collection does NOT redirect to /auth when logged out (token removed but page still renders cached state).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Protected route guard for /collection (and likely /tracker)",
+        "issue": "After removing 'muslim_world_token' from localStorage and navigating to /collection, the page did not redirect to /auth — URL stayed at /collection. Per spec the page should redirect when not logged in. The route guard either renders cached state or doesn't enforce. Likely Tracker has the same problem since both are protected. Should also add a React-Router guard that reads auth state and <Navigate to=\"/auth\" /> when null.",
+        "affected_selectors": ["/collection route", "/tracker route"]
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "All pages",
+        "issues": [
+          "Missing data-testid attributes on interactive elements (auth email/password inputs, Sign in / Sign up buttons, Mark visited / Mark prayed buttons, save bookmark button, nav Admin badge). Adds testability fragility — current tests rely on placeholder/role/text selectors."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_muslim_world_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Add client-side route guards for /collection and /tracker that redirect to /auth when no token is present (currently they render even after token removal).",
+    "Add data-testid attributes to key interactive elements: auth inputs (email-input, password-input), submit buttons (auth-signin-btn, auth-signup-btn), nav admin badge (nav-admin-badge), tracker Mark visited / Mark prayed buttons (mark-visited-{siteId}, mark-prayed-{siteId}), collection bookmark toggle."
+  ],
+  "critical_code_review_comments": [
+    "server.py is 553 lines — borderline; consider splitting into routers (auth, sites, hotspots, collections) when it grows further.",
+    "CORS is configured allow_origins=['*'] with allow_credentials=False — fine for JWT-bearer flow, but lock down origins for production.",
+    "Stateless JWT logout endpoint at POST /api/auth/logout returns ok but cannot truly revoke a token; acceptable for MVP but document client must drop token.",
+    "/api/auth/logs upsert correctly handles partial updates (visited xor prayed) via $set/$setOnInsert with dedup — verified in tests.",
+    "All Mongo queries correctly project out _id ({_id:0}) or stringify ObjectId; no ObjectId leak in responses.",
+    "Admin gate uses email comparison against ADMIN_EMAIL env var (single admin) — fine for current scope; for multi-admin add an isAdmin flag on user docs."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_muslim_world_api.py (new)"
+  ],
+  "success_rate": {
+    "backend": "100% (25/25 pytest cases)",
+    "frontend": "~95% (5/5 main flows OK; 1 minor protected-route redirect issue)"
+  },
+  "test_credentials": "Admin: admin@muslimworld.app / Admin@MuslimWorld2026. Test users registered dynamically per test run (test_user_<uuid>@example.com / TestPass1234).",
+  "seed_data_creation": "Seed runs once on backend startup from /app/backend/seed_data.json. Verified 52 sites, 12 hotspots, 12 regions present in MongoDB. Featured count = 13. Admin user seeded automatically from ADMIN_EMAIL env. Tests dynamically create one extra test user per run and use site_id=1 for collection/log flows.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend is fully green. The frontend is React 19 + Vite (yarn start -> vite --port 3000). Token storage key: 'muslim_world_token' in localStorage. Auth header: 'Bearer <jwt>'. Site detail page successfully loads 3D canvas via Three.js and 3 hotspots from /api/sites/{id}. Explore page renders Leaflet with 52 markers. Only outstanding item is the protected-route guard on /collection (and likely /tracker) — when token is removed, the user is not redirected to /auth. Backend tests live at /app/backend/tests/test_muslim_world_api.py and can be re-run via `pytest backend/tests/ -v`.",
+  "rca of the issue": "Frontend protected-route bug: After running `localStorage.removeItem('muslim_world_token')` and navigating to /collection, the URL remained /collection (no redirect). RCA: the route guard component (likely in App.tsx routes) either (a) reads auth state once from React context at mount and does not re-evaluate on subsequent navigation, or (b) is missing entirely and the page only shows an empty state for logged-out users. Mitigation: in App.tsx wrap CollectionPage and TrackerPage routes with a ProtectedRoute component that reads useAuth() and renders <Navigate to='/auth' replace /> when user is null."
+}
