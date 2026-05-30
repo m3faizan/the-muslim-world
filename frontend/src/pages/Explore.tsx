@@ -40,7 +40,7 @@ const CATEGORIES = [
 type CategoryLabel = (typeof CATEGORIES)[number]["label"];
 
 function normalizeCategory(raw: string): CategoryLabel {
-  const c = raw.toLowerCase().trim();
+  const c = raw.toLowerCase().trim().replace(/[_-]+/g, " ");
   if (c === "holy" || c === "holy site" || c === "holy sites") return "Holy Sites";
   if (c === "mosque")                             return "Mosque";
   if (c === "shrine")                             return "Shrine";
