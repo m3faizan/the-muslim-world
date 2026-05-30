@@ -3,7 +3,7 @@ import { useRoute, Link } from "wouter";
 import { useGetSite } from "@workspace/api-client-react";
 import { apiFetch } from "@/lib/api";
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls, Html, useGLTF, Center, Bounds } from "@react-three/drei";
+import { OrbitControls, Html, useGLTF, Center } from "@react-three/drei";
 import * as THREE from "three";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import {
@@ -33,6 +33,7 @@ import {
 import { GlobeErrorBoundary, isWebGLAvailable } from "@/components/GlobeErrorBoundary";
 import { useAuth } from "@/context/AuthContext";
 import { useCollection } from "@/context/CollectionContext";
+import { useThree } from "@react-three/fiber";
 
 type Hotspot = {
   id: number;
@@ -308,6 +309,7 @@ function ObjMesh({
 
   return (
     <Center>
+      <FrameBuilding object={obj} />
       <group
         ref={groupRef}
         onPointerDown={annotateMode ? (e: any) => {
@@ -362,6 +364,81 @@ function ObjMesh({
   );
 }
 
+// ─── Smart camera framing: ignores extremely-flat meshes (ground planes / satellite plates)
+// and frames the visible "building". Replaces drei <Bounds>, which gets fooled by ground plates.
+function useFrameVisibleBuilding(object: THREE.Object3D | null, deps: unknown[] = []) {
+  const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
+  const controls = useThree((s) => s.controls) as any;
+  useEffect(() => {
+    if (!object) return;
+    const id = requestAnimationFrame(() => {
+      // Build a union bbox using only meshes that aren't extreme outliers
+      // in aspect ratio (those are usually ground / sky / satellite plates).
+      const buildingBox = new THREE.Box3();
+      const meshBoxes: THREE.Box3[] = [];
+      object.traverse((o: any) => {
+        if (o.isMesh && o.geometry) {
+          o.geometry.computeBoundingBox?.();
+          const b = new THREE.Box3().setFromObject(o);
+          if (b.isEmpty()) return;
+          meshBoxes.push(b);
+        }
+      });
+      if (meshBoxes.length === 0) return;
+      // Compute median maxDim so we can filter outliers (huge ground plates).
+      const dims = meshBoxes.map((b) => {
+        const s = new THREE.Vector3();
+        b.getSize(s);
+        return Math.max(s.x, s.y, s.z);
+      });
+      const sorted = [...dims].sort((a, b) => a - b);
+      const median = sorted[Math.floor(sorted.length / 2)] || 1;
+      for (let i = 0; i < meshBoxes.length; i++) {
+        const b = meshBoxes[i];
+        const s = new THREE.Vector3();
+        b.getSize(s);
+        const maxDim = Math.max(s.x, s.y, s.z);
+        const minDim = Math.max(s.x, s.y, s.z, 0.0001) === 0 ? 0.0001 : Math.min(s.x, s.y, s.z) || 0.0001;
+        const aspect = maxDim / minDim;
+        // Drop ridiculously flat or ridiculously large outliers (ground/sky plates).
+        if (aspect > 30 && maxDim > median * 4) continue;
+        if (maxDim > median * 20) continue;
+        buildingBox.union(b);
+      }
+      const targetBox = buildingBox.isEmpty()
+        ? new THREE.Box3().setFromObject(object)
+        : buildingBox;
+      const center = targetBox.getCenter(new THREE.Vector3());
+      const size = targetBox.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const fov = (camera.fov * Math.PI) / 180;
+      const distance = (maxDim / 2) / Math.tan(fov / 2) * 1.6;
+      const offset = new THREE.Vector3(
+        distance * 0.6,
+        Math.max(size.y, maxDim * 0.35) * 0.55 + distance * 0.25,
+        distance * 0.85,
+      );
+      camera.position.copy(center.clone().add(offset));
+      camera.near = Math.max(0.1, distance / 1000);
+      camera.far = distance * 50;
+      camera.lookAt(center);
+      camera.updateProjectionMatrix();
+      if (controls && controls.target) {
+        controls.target.copy(center);
+        controls.update?.();
+      }
+    });
+    return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+}
+
+// Helper component: triggers framing whenever the underlying 3D scene changes
+function FrameBuilding({ object }: { object: THREE.Object3D | null }) {
+  useFrameVisibleBuilding(object, [object]);
+  return null;
+}
+
 // ─── GLTF Model loader ──────────────────────────────────────────────────────────
 function GltfMesh({
   url,
@@ -394,13 +471,12 @@ function GltfMesh({
 
   return (
     <Center>
+      <FrameBuilding object={scene} />
       <group
         ref={groupRef}
         onPointerDown={annotateMode ? (e: any) => {
           e.stopPropagation();
           if (e.point && groupRef.current) {
-            // Convert world-space hit point → group local space so the stored
-            // position matches where we render hotspot markers (also inside this group).
             const local = groupRef.current.worldToLocal(e.point.clone());
             onAnnotate?.({ x: local.x, y: local.y, z: local.z });
           }
@@ -978,39 +1054,38 @@ export default function SiteDetail() {
                       <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
 
                       <Suspense fallback={null}>
-                        <Bounds fit clip observe margin={1.3}>
-                          {site.modelUrl.endsWith(".obj") ? (
-                            <ObjMesh
-                              url={site.modelUrl}
-                              hotspots={hotspots}
-                              onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
-                              activeHotspot={activeHotspot}
-                              annotateMode={annotateMode}
-                              onAnnotate={(pos) => setPendingPos(pos)}
-                              onClose={() => setActiveHotspot(null)}
-                            />
-                          ) : (
-                            <GltfMesh
-                              url={site.modelUrl}
-                              hotspots={hotspots}
-                              onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
-                              activeHotspot={activeHotspot}
-                              annotateMode={annotateMode}
-                              onAnnotate={(pos) => setPendingPos(pos)}
-                              onClose={() => setActiveHotspot(null)}
-                            />
-                          )}
-                        </Bounds>
+                        {site.modelUrl.endsWith(".obj") ? (
+                          <ObjMesh
+                            url={site.modelUrl}
+                            hotspots={hotspots}
+                            onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                            activeHotspot={activeHotspot}
+                            annotateMode={annotateMode}
+                            onAnnotate={(pos) => setPendingPos(pos)}
+                            onClose={() => setActiveHotspot(null)}
+                          />
+                        ) : (
+                          <GltfMesh
+                            url={site.modelUrl}
+                            hotspots={hotspots}
+                            onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                            activeHotspot={activeHotspot}
+                            annotateMode={annotateMode}
+                            onAnnotate={(pos) => setPendingPos(pos)}
+                            onClose={() => setActiveHotspot(null)}
+                          />
+                        )}
                       </Suspense>
 
                       <OrbitControls
                         ref={orbitRef}
+                        makeDefault
                         enabled={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                         enableRotate={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                         enableZoom={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                         enablePan={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                         minDistance={0.5}
-                        maxDistance={500}
+                        maxDistance={50000}
                       />
                     </Canvas>
                   </GlobeErrorBoundary>
@@ -1065,31 +1140,10 @@ export default function SiteDetail() {
                   <pointLight position={[0, 5, 0]} intensity={0.5} color="#f5efe0" />
 
                   <Suspense fallback={null}>
-                    <Bounds fit clip observe margin={1.3}>
-                      {site.modelUrl ? (
-                        site.modelUrl.endsWith(".obj") ? (
-                          <ObjMesh
-                            url={site.modelUrl}
-                            hotspots={hotspots}
-                            onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
-                            activeHotspot={activeHotspot}
-                            annotateMode={annotateMode}
-                            onAnnotate={(pos) => setPendingPos(pos)}
-                            onClose={() => setActiveHotspot(null)}
-                          />
-                        ) : (
-                          <GltfMesh
-                            url={site.modelUrl}
-                            hotspots={hotspots}
-                            onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
-                            activeHotspot={activeHotspot}
-                            annotateMode={annotateMode}
-                            onAnnotate={(pos) => setPendingPos(pos)}
-                            onClose={() => setActiveHotspot(null)}
-                          />
-                        )
-                      ) : (
-                        <MosqueMesh
+                    {site.modelUrl ? (
+                      site.modelUrl.endsWith(".obj") ? (
+                        <ObjMesh
+                          url={site.modelUrl}
                           hotspots={hotspots}
                           onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
                           activeHotspot={activeHotspot}
@@ -1097,18 +1151,38 @@ export default function SiteDetail() {
                           onAnnotate={(pos) => setPendingPos(pos)}
                           onClose={() => setActiveHotspot(null)}
                         />
-                      )}
-                    </Bounds>
+                      ) : (
+                        <GltfMesh
+                          url={site.modelUrl}
+                          hotspots={hotspots}
+                          onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                          activeHotspot={activeHotspot}
+                          annotateMode={annotateMode}
+                          onAnnotate={(pos) => setPendingPos(pos)}
+                          onClose={() => setActiveHotspot(null)}
+                        />
+                      )
+                    ) : (
+                      <MosqueMesh
+                        hotspots={hotspots}
+                        onHotspotClick={(h) => setActiveHotspot(prev => prev?.id === h.id ? null : h)}
+                        activeHotspot={activeHotspot}
+                        annotateMode={annotateMode}
+                        onAnnotate={(pos) => setPendingPos(pos)}
+                        onClose={() => setActiveHotspot(null)}
+                      />
+                    )}
                   </Suspense>
 
                   <OrbitControls
                     ref={orbitRef}
+                    makeDefault
                     enabled={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                     enableRotate={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                     enableZoom={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                     enablePan={!annotateMode && !(isCameraLocked && !user?.isAdmin)}
                     minDistance={0.5}
-                    maxDistance={500}
+                    maxDistance={50000}
                   />
                 </Canvas>
               </GlobeErrorBoundary>
