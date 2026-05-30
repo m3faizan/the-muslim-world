@@ -78,6 +78,7 @@ export default function AuthPage() {
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#3d5566" }} />
                   <input
+                    data-testid="auth-displayname-input"
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
@@ -99,6 +100,7 @@ export default function AuthPage() {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#3d5566" }} />
                 <input
+                  data-testid="auth-email-input"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -119,6 +121,7 @@ export default function AuthPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#3d5566" }} />
                 <input
+                  data-testid="auth-password-input"
                   type={showPw ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -147,6 +150,7 @@ export default function AuthPage() {
             )}
 
             <button
+              data-testid={mode === "login" ? "auth-signin-btn" : "auth-signup-btn"}
               type="submit"
               disabled={loading}
               className="w-full py-3 rounded-lg font-medium text-sm transition-opacity mt-2"
@@ -161,14 +165,14 @@ export default function AuthPage() {
             {mode === "login" ? (
               <>
                 Don't have an account?{" "}
-                <button onClick={() => { setMode("register"); setError(""); }} className="font-medium" style={{ color: "#c9a227" }}>
+                <button data-testid="auth-toggle-register" onClick={() => { setMode("register"); setError(""); }} className="font-medium" style={{ color: "#c9a227" }}>
                   Sign up
                 </button>
               </>
             ) : (
               <>
                 Already have an account?{" "}
-                <button onClick={() => { setMode("login"); setError(""); }} className="font-medium" style={{ color: "#c9a227" }}>
+                <button data-testid="auth-toggle-login" onClick={() => { setMode("login"); setError(""); }} className="font-medium" style={{ color: "#c9a227" }}>
                   Sign in
                 </button>
               </>

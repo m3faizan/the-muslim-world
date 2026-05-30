@@ -11,6 +11,7 @@ import AuthPage from "@/pages/AuthPage";
 import TrackerPage from "@/pages/TrackerPage";
 import CollectionPage from "@/pages/CollectionPage";
 import NotFound from "@/pages/not-found";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,8 +29,16 @@ function Router() {
       <Route path="/explore" component={Explore} />
       <Route path="/site/:id" component={SiteDetail} />
       <Route path="/auth" component={AuthPage} />
-      <Route path="/tracker" component={TrackerPage} />
-      <Route path="/collection" component={CollectionPage} />
+      <Route path="/tracker">
+        <ProtectedRoute>
+          <TrackerPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/collection">
+        <ProtectedRoute>
+          <CollectionPage />
+        </ProtectedRoute>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

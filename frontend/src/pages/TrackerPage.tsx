@@ -127,6 +127,7 @@ export default function TrackerPage() {
 
                     {/* Visited toggle */}
                     <button
+                      data-testid={`mark-visited-${site.id}`}
                       onClick={() => toggle(site.id, "visited")}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                       style={{
@@ -141,6 +142,7 @@ export default function TrackerPage() {
 
                     {/* Prayed toggle */}
                     <button
+                      data-testid={`mark-prayed-${site.id}`}
                       onClick={() => toggle(site.id, "prayed")}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                       style={{
