@@ -17,9 +17,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@workspace/api-client-react": ["../lib/api-client-react/src/index.ts"]
+      "@workspace/api-client-react": ["./src/lib/api-client-react/index.ts"]
     }
   },
-  "include": ["src/**/*", "../lib/api-client-react/src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "build", "dist"]
 }

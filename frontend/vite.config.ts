@@ -18,10 +18,9 @@ export default defineConfig(({ mode }) => {
         "@assets": path.resolve(__dirname, "..", "attached_assets"),
         "@workspace/api-client-react": path.resolve(
           __dirname,
-          "..",
+          "src",
           "lib",
           "api-client-react",
-          "src",
           "index.ts",
         ),
       },
