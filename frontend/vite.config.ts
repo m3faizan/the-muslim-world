@@ -32,7 +32,11 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       host: "0.0.0.0",
       allowedHosts: true,
-      hmr: { clientPort: 443 },
+      // Disable HMR: the preview is served through an HTTPS reverse-proxy
+      // where Vite's WebSocket can't reliably connect, which would otherwise
+      // cause the client to do periodic full-page reloads. We can still pick
+      // up code changes by manually refreshing the browser.
+      hmr: false,
       fs: { strict: false, allow: [path.resolve(__dirname, ".."), path.resolve(__dirname)] },
     },
     preview: {
