@@ -18,6 +18,11 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 5,
       retry: 1,
+      // The catalogue is static — don't refetch every time the tab regains focus,
+      // reconnects, or remounts. Avoids the "page keeps refreshing" feeling.
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMount: false,
     },
   },
 });
